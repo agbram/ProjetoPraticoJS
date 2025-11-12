@@ -1,0 +1,16 @@
+body {
+  background-color: #121212;
+  color: #eee;
+  font-family: "Poppins", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+.btn-outline-light {
+  border-radius: 10px;
+}
