@@ -11,6 +11,15 @@ main {
   flex: 1;
 }
 
+div {
+  display: flex;
+  gap: 15px;
+}
+
+.card-body{
+  display: block;
+}
+
 .btn-outline-light {
   border-radius: 10px;
 }
