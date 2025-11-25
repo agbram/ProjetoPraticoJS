@@ -22,36 +22,147 @@ async function buscarDados(endpoint) {
 // Carrega todos os filmes assim que o código inicia
 const filmes = await buscarDados("films");
 
+// Função auxiliar para buscar múltiplos dados da API
+async function buscarDadosDasURLs(urls) {
+  if (!urls || urls.length === 0) {
+    return [];
+  }
+
+  try {
+    const promises = urls.map((url) =>
+      fetch(url)
+        .then((response) => {
+          if (!response.ok) throw new Error("Erro na requisição");
+          return response.json();
+        })
+        .then((data) => data.name || data.title) // Pega 'name' ou 'title'
+        .catch((error) => {
+          console.error(`Erro ao buscar ${url}:`, error);
+          return "N/A";
+        })
+    );
+
+    return await Promise.all(promises);
+  } catch (error) {
+    console.error("Erro geral ao buscar dados:", error);
+    return [];
+  }
+}
+
 // Função para criar e adicionar cards na tela
 function adicionaCards(listaFilmes) {
-  const container = document.getElementById("listaFilmes"); // Div onde os cards serão exibidos
+  const container = document.getElementById("listaFilmes");
 
-  // Percorre a lista de filmes recebida
-  listaFilmes.forEach((filmes) => {
-    // Cria o card
+  listaFilmes.forEach((filme, indice) => {
     const cardDiv = document.createElement("div");
     cardDiv.classList.add("card");
     cardDiv.style.width = "18rem";
+    cardDiv.style.cursor = "pointer"; // Adiciona cursor pointer para indicar que é clicável
 
-    // Parte interna do card
     const cardBody = document.createElement("div");
     cardBody.classList.add("card-body");
 
-    // Título do filme
-    const titulo = document.createElement("p");
-    titulo.textContent = `Título: ${filmes.title}`;
+    const titulo = document.createElement("h5");
+    titulo.classList.add("card-title");
+    titulo.textContent = filme.title;
 
-    // Diretor do filme
     const diretor = document.createElement("p");
-    diretor.textContent = `Diretor: ${filmes.director}`;
+    diretor.classList.add("card-text");
+    diretor.textContent = `Diretor: ${filme.director}`;
 
-    // Monta o card: card → cardBody → textos
-    cardDiv.appendChild(cardBody);
     cardBody.appendChild(titulo);
     cardBody.appendChild(diretor);
-
-    // Adiciona o card dentro do container
+    cardDiv.appendChild(cardBody);
     container.appendChild(cardDiv);
+
+    // Evento de abrir modal
+    cardDiv.addEventListener("click", async () => {
+      // Preencher informações básicas do modal
+      document.getElementById("modalTitulo").textContent = filme.title;
+      document.getElementById("modalDiretor").textContent = filme.director;
+      document.getElementById("modalProdutor").textContent = filme.producer;
+      document.getElementById("modalAbertura").textContent =
+        filme.opening_crawl;
+
+      // Formatar data
+      const dataLancamento = filme.release_date;
+      let dataFormatada;
+      if (dataLancamento) {
+        const data = new Date(dataLancamento);
+        if (!isNaN(data.getTime())) {
+          dataFormatada = data.toLocaleDateString("pt-BR");
+        }
+      }
+      document.getElementById("modalDataLancamento").textContent =
+        dataFormatada;
+
+      // Mostrar loading nas listas
+      mostrarLoadingModal();
+
+      // Buscar dados adicionais em paralelo
+      try {
+        const [personagens, planetas, naves, veiculos, especies] =
+          await Promise.all([
+            buscarDadosDasURLs(filme.characters),
+            buscarDadosDasURLs(filme.planets),
+            buscarDadosDasURLs(filme.starships),
+            buscarDadosDasURLs(filme.vehicles),
+            buscarDadosDasURLs(filme.species),
+          ]);
+
+        // Preencher as listas no modal
+        preencherListaModal("modalPersonagens", personagens);
+        preencherListaModal("modalPlanetas", planetas);
+        preencherListaModal("modalNaves", naves);
+        preencherListaModal("modalVeiculos", veiculos);
+        preencherListaModal("modalEspecies", especies);
+      } catch (error) {
+        console.error("Erro ao carregar dados adicionais:", error);
+        preencherListaModal("modalPersonagens", ["Erro ao carregar dados"]);
+      }
+
+      // Abrir modal (Bootstrap)
+      const modal = new bootstrap.Modal(document.getElementById("filmeModal"));
+      modal.show();
+    });
+  });
+}
+
+// Função para mostrar estado de loading no modal
+function mostrarLoadingModal() {
+  const elementosLoading = [
+    "modalPersonagens",
+    "modalPlanetas",
+    "modalNaves",
+    "modalVeiculos",
+    "modalEspecies",
+  ];
+
+  elementosLoading.forEach((id) => {
+    const elemento = document.getElementById(id);
+    if (elemento) {
+      elemento.innerHTML = '<li class="text-muted">Carregando...</li>';
+    }
+  });
+}
+
+// Função para preencher listas no modal
+function preencherListaModal(elementId, itens) {
+  const elemento = document.getElementById(elementId);
+  if (!elemento) return;
+
+  elemento.innerHTML = "";
+
+  if (itens.length === 0) {
+    elemento.innerHTML = '<li class="text-muted">Nenhum item encontrado</li>';
+    return;
+  }
+
+  itens.forEach((item) => {
+    const li = document.createElement("li");
+    li.classList.add("mb-1");
+    li.textContent = item;
+    elemento.appendChild(li);
   });
 }
 
