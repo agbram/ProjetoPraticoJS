@@ -1,0 +1,312 @@
+/* personagens.css - Estilo específico para a página de personagens */
+
+/* Container principal dos personagens */
+#listaPersonagens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+/* Cards de personagens */
+.personagem-card {
+  background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+  border: 1px solid #333;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.personagem-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+  border-color: #ffc107;
+}
+
+.personagem-card-header {
+  background: linear-gradient(135deg, #121212, #2a2a2a);
+  padding: 1.5rem;
+  border-bottom: 1px solid #333;
+  position: relative;
+}
+
+.personagem-card-title {
+  color: #ffc107;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.personagem-card-subtitle {
+  color: #aaa;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.personagem-card-body {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.personagem-card-features {
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.personagem-feature {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #333;
+}
+
+.personagem-feature:last-child {
+  border-bottom: none;
+}
+
+.feature-label {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.feature-value {
+  color: #fff;
+  font-weight: 500;
+}
+
+.personagem-card-footer {
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+}
+
+/* Modal específico para personagens */
+#modalPersonagem .modal-content {
+  background: linear-gradient(145deg, #1a1a1a, #252525);
+  border: 1px solid #444;
+}
+
+#modalPersonagem .modal-header {
+  background: linear-gradient(135deg, #121212, #2a2a2a);
+  border-bottom: 1px solid #444;
+  padding: 1.5rem;
+}
+
+#modalPersonagem .modal-title {
+  color: #ffc107;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+#modalPersonagem .modal-body {
+  padding: 2rem;
+}
+
+.personagem-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.personagem-detail-group {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1.2rem;
+  border-left: 3px solid #ffc107;
+}
+
+.detail-group-title {
+  color: #ffc107;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.personagem-detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #333;
+}
+
+.personagem-detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.detail-value {
+  color: #fff;
+  font-weight: 500;
+  text-align: right;
+}
+
+.personagem-specs-highlight {
+  background: linear-gradient(135deg, #ffc10715, #ffc10705);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  border: 1px solid #ffc10730;
+}
+
+.spec-highlight {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.spec-highlight:last-child {
+  margin-bottom: 0;
+}
+
+.spec-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  color: #ffc107;
+}
+
+.spec-text {
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+/* Badges para personagens */
+.personagem-badge {
+  display: inline-block;
+  background: #ffc107;
+  color: #121212;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.5rem;
+}
+
+/* Botão de detalhes personalizado */
+.btn-personagem-detalhes {
+  background: linear-gradient(135deg, #ffc107, #ff8f00);
+  border: none;
+  color: #121212;
+  font-weight: 600;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-personagem-detalhes:hover {
+  background: linear-gradient(135deg, #ffd54f, #ffc107);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+  color: #121212;
+}
+
+/* Animações de entrada para os cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.personagem-card {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.personagem-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.personagem-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.personagem-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* Responsividade para personagens */
+@media (max-width: 768px) {
+  #listaPersonagens {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .personagem-details-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  #modalPersonagem .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .personagem-card-header {
+    padding: 1.2rem;
+  }
+  
+  .personagem-card-body {
+    padding: 1.2rem;
+  }
+}
+
+/* Estados vazios */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Destaque para personagens especiais */
+.personagem-card.featured {
+  border: 2px solid #ffc107;
+  position: relative;
+}
+
+.personagem-card.featured::before {
+  content: "⭐ DESTAQUE";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ffc107;
+  color: #121212;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  z-index: 1;
+}
+
+body {
+    background-color: black;
+}
+
+h2 {
+    color: white;
+}
