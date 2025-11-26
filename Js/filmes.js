@@ -49,6 +49,8 @@ async function buscarDadosDasURLs(urls) {
   }
 }
 
+let filmsFavorites;
+
 // Função para criar e adicionar cards na tela
 function adicionaCards(listaFilmes) {
   const container = document.getElementById("listaFilmes");
@@ -123,10 +125,20 @@ function adicionaCards(listaFilmes) {
 
       // Abrir modal (Bootstrap)
       const modal = new bootstrap.Modal(document.getElementById("filmeModal"));
+
+      filmsFavorites = filme;
+
+      buttonFavorites.addEventListener("click", () => {
+        document.activeElement.blur(); // remove o foco antes do modal fechar
+        modal.hide();
+      });
+
       modal.show();
     });
   });
 }
+
+console.log(filmsFavorites);
 
 // Função para mostrar estado de loading no modal
 function mostrarLoadingModal() {
@@ -199,4 +211,24 @@ botao.addEventListener("click", function () {
   container.innerHTML = ""; // Limpa os cards da tela
 
   adicionaCards(filmeFiltrado); // Adiciona somente os resultados filtrados
+});
+
+const buttonFavorites = document.getElementById("btn-favorite");
+
+buttonFavorites.addEventListener("click", () => {
+  let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+  // verifica se já existe
+  const jaExiste = favoritos.some(f => f.title === filmsFavorites.title);
+
+  if (jaExiste) {
+    alert("Esse filme já está nos favoritos!");
+    return;
+  }
+
+  // adiciona se não existir
+  favoritos.push(filmsFavorites);
+  localStorage.setItem("favoritos", JSON.stringify(favoritos));
+
+  alert("Filme salvo com sucesso!");
 });

@@ -1,0 +1,111 @@
+/* Botão de Favoritos - Estilo Discreto */
+.btn-favoritos-flutuante {
+  position: fixed;
+  bottom: 80px;
+  right: 30px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+  color: #121212;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  z-index: 1030; /* Aumentado para ficar acima do footer */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-favoritos-flutuante:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 25px rgba(255, 215, 0, 0.4);
+  color: #121212;
+  text-decoration: none;
+}
+
+.btn-favoritos-flutuante:active {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.btn-favoritos-flutuante::before {
+  content: "⭐";
+  font-size: 16px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+}
+
+/* Efeito de brilho sutil */
+.btn-favoritos-flutuante::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0) 50%
+  );
+  z-index: -1;
+}
+
+/* Se você tiver um footer, adicione este CSS para ele */
+footer {
+  position: relative;
+  z-index: 1020; /* Z-index menor que o botão */
+}
+
+/* Alternativamente, se quiser que o botão fique SEMPRE acima de tudo */
+.btn-favoritos-flutuante.always-on-top {
+  z-index: 9999; /* Valor muito alto */
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .btn-favoritos-flutuante {
+    bottom: 80px; /* Aumentado para ficar acima do footer mobile */
+    right: 20px;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .btn-favoritos-flutuante::before {
+    font-size: 14px;
+  }
+}
+
+/* Para telas muito pequenas */
+@media (max-width: 480px) {
+  .btn-favoritos-flutuante {
+    bottom: 70px; /* Ajuste para mobile */
+    right: 15px;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .btn-favoritos-flutuante span {
+    display: none;
+  }
+
+  .btn-favoritos-flutuante::before {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+/* Garantir que elementos modais fiquem acima do botão */
+.modal {
+  z-index: 1060; /* Modais acima do botão */
+}
+
+/* Garantir que outros elementos fixos/sticky tenham z-index adequado */
+.navbar-fixed,
+.sticky-header {
+  z-index: 1030; /* Similar ao botão */
+}
