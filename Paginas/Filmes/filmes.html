@@ -10,7 +10,6 @@
     />
     <link rel="stylesheet" href="../../Css/filmes/style.css" />
     <link rel="stylesheet" href="../../Css/filmes/favoritos.css" />
-    <link rel="stylesheet" href="" />
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -27,7 +26,7 @@
         <div class="collapse navbar-collapse" id="menu">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <a class="nav-link active" href="/Paginas//Filmes/filmes.html"
+              <a class="nav-link active" href="/Paginas/Filmes/filmes.html"
                 >Filmes</a
               >
             </li>
@@ -66,9 +65,14 @@
       </div>
 
       <!-- Lista de filmes -->
-      <div id="listaFilmes"></div>
+      <div id="listaFilmes" class="row"></div>
     </main>
-    <a href="favoritos.html" class="btn-favoritos-flutuante" target="_blank">
+
+    <a
+      href="javascript:void(0)"
+      class="btn-favoritos-flutuante"
+      id="btnAbrirFavoritos"
+    >
       <span>Ver Favoritos</span>
     </a>
 
@@ -76,7 +80,7 @@
       <p>© 2025 Star Wars Explorer</p>
     </footer>
 
-    <!-- Modal -->
+    <!-- Modal de Detalhes do Filme -->
     <div
       class="modal fade"
       id="filmeModal"
@@ -180,14 +184,56 @@
             >
               Fechar
             </button>
-            <button type="button" id="btn-favorite">Favoritar⭐</button>
+            <!-- BOTÃO FAVORITAR ADICIONADO AQUI -->
+            <button type="button" class="btn btn-warning" id="btn-favorite">
+              Favoritar⭐
+            </button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Modal para exibir filmes favoritos -->
+    <div
+      class="modal fade"
+      id="favoritosModal"
+      tabindex="-1"
+      aria-labelledby="favoritosModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h1 class="modal-title fs-4 fw-bold" id="favoritosModalLabel">
+              ⭐ Meus Filmes Favoritos
+            </h1>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <div id="listaFavoritosModal">
+              <!-- Lista de favoritos será inserida aqui -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              data-bs-dismiss="modal"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Bootstrap + JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../Js/main.js"></script>
-    <script type="module" src="../../Js/filmes.js"></script>
+    <script src="../../Js/filmes.js"></script>
   </body>
 </html>
