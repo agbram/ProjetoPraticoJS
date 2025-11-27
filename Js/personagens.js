@@ -20,6 +20,199 @@ async function buscarDados(endpoint) {
   }
 }
 
+// Pega do localStorage
+let favoritos = JSON.parse(localStorage.getItem("favoritosPersonagens")) || [];
+
+// Função para verificar se um personagem é favorito
+function isFavorito(personagem) {
+  return favoritos.some(fav => fav.name === personagem.name);
+}
+
+// Função para favoritar/desfavoritar personagem
+function toggleFavorito(personagem, botaoFavorito = null) {
+  const index = favoritos.findIndex(fav => fav.name === personagem.name);
+  
+  if (index === -1) {
+    // Adicionar aos favoritos
+    favoritos.push(personagem);
+    if (botaoFavorito) {
+      botaoFavorito.innerHTML = '<i class="fas fa-heart"></i>';
+      botaoFavorito.classList.add('favoritado');
+    }
+  } else {
+    // Remover dos favoritos
+    favoritos.splice(index, 1);
+    if (botaoFavorito) {
+      botaoFavorito.innerHTML = '<i class="far fa-heart"></i>';
+      botaoFavorito.classList.remove('favoritado');
+    }
+  }
+  
+  // Atualizar localStorage
+  localStorage.setItem("favoritosPersonagens", JSON.stringify(favoritos));
+  
+  // Atualizar todos os botões de favorito na página
+  atualizarBotoesFavorito();
+}
+
+// Função para atualizar todos os botões de favorito na página
+function atualizarBotoesFavorito() {
+  const botoesFavorito = document.querySelectorAll('.btn-favorito');
+  
+  botoesFavorito.forEach(botao => {
+    const card = botao.closest('.personagem-card');
+    const titulo = card.querySelector('.personagem-card-title');
+    if (titulo) {
+      const nomePersonagem = titulo.textContent;
+      const personagemEncontrado = favoritos.find(fav => fav.name === nomePersonagem);
+      
+      if (personagemEncontrado) {
+        botao.innerHTML = '<i class="fas fa-heart"></i>';
+        botao.classList.add('favoritado');
+      } else {
+        botao.innerHTML = '<i class="far fa-heart"></i>';
+        botao.classList.remove('favoritado');
+      }
+    }
+  });
+}
+
+// Variável para controlar a instância do modal
+let modalFavoritosInstance = null;
+
+// Função para montar e exibir modal de favoritos
+function exibirModalFavoritos(lista) {
+  const modalElement = document.getElementById("modalFavoritos");
+  const modalBody = modalElement.querySelector(".modal-body");
+  
+  // Limpa o conteúdo anterior
+  modalBody.innerHTML = "";
+  
+  // Remove event listeners antigos se existirem
+  const listaAntiga = modalBody.querySelector('.list-group');
+  if (listaAntiga) {
+    listaAntiga.remove();
+  }
+  
+  // Caso não tenha favoritos
+  if (lista.length === 0) {
+    modalBody.innerHTML = `
+      <div class="text-center py-4">
+        <i class="fas fa-heart-broken fa-3x text-muted mb-3"></i>
+        <h5>Nenhum favorito salvo</h5>
+        <p class="text-muted">Adicione alguns personagens aos seus favoritos para vê-los aqui.</p>
+      </div>
+    `;
+  } else {
+    // Cria a lista de favoritos
+    const listaFavoritos = document.createElement("div");
+    listaFavoritos.className = "list-group";
+    
+    lista.forEach((personagem, indice) => {
+      const item = document.createElement("div");
+      item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+      item.setAttribute('data-personagem-nome', personagem.name);
+      
+      item.innerHTML = `
+        <div class="flex-grow-1">
+          <h6 class="mb-1">${personagem.name}</h6>
+          <small class="text-muted">${personagem.gender} • ${personagem.birth_year}</small>
+        </div>
+        <button class="btn btn-outline-danger btn-sm btn-remover-favorito ms-2" data-nome="${personagem.name}">
+          <i class="fas fa-trash"></i>
+        </button>
+      `;
+      
+      listaFavoritos.appendChild(item);
+    });
+    
+    modalBody.appendChild(listaFavoritos);
+    
+    // Adiciona event delegation para os botões de remover
+    listaFavoritos.addEventListener('click', function(e) {
+      const botaoRemover = e.target.closest('.btn-remover-favorito');
+      if (botaoRemover) {
+        e.preventDefault();
+        e.stopPropagation();
+        const nomePersonagem = botaoRemover.getAttribute('data-nome');
+        removerFavoritoPorNome(nomePersonagem);
+        return;
+      }
+      
+      // Se clicou no item (não no botão de remover)
+      const item = e.target.closest('.list-group-item');
+      if (item && !e.target.closest('.btn-remover-favorito')) {
+        const nomePersonagem = item.getAttribute('data-personagem-nome');
+        const personagem = favoritos.find(fav => fav.name === nomePersonagem);
+        if (personagem) {
+          // Fecha o modal de favoritos
+          if (modalFavoritosInstance) {
+            modalFavoritosInstance.hide();
+          }
+          
+          // Abre o modal com os detalhes do personagem
+          exibirModalPersonagem(personagem);
+        }
+      }
+    });
+  }
+  
+  // Cria ou obtém a instância do modal
+  if (!modalFavoritosInstance) {
+    modalFavoritosInstance = new bootstrap.Modal(modalElement);
+  }
+  
+  // Exibe o modal
+  modalFavoritosInstance.show();
+}
+
+// Função que remove favorito por nome e atualiza a interface
+function removerFavoritoPorNome(nomePersonagem) {
+  const index = favoritos.findIndex(fav => fav.name === nomePersonagem);
+  
+  if (index !== -1) {
+    favoritos.splice(index, 1);
+    localStorage.setItem("favoritosPersonagens", JSON.stringify(favoritos));
+    
+    // Atualiza a interface
+    atualizarBotoesFavorito();
+    
+    // Se o modal de favoritos estiver aberto, atualiza ele também
+    const modalElement = document.getElementById('modalFavoritos');
+    if (modalElement.classList.contains('show')) {
+      // Pequeno delay para garantir a atualização
+      setTimeout(() => {
+        exibirModalFavoritos(favoritos);
+      }, 100);
+    }
+  }
+}
+
+// Evento para abrir modal de favoritos
+document.addEventListener('DOMContentLoaded', function() {
+  const botaoFavoritos = document.getElementById('btnFavoritos');
+  if (botaoFavoritos) {
+    botaoFavoritos.addEventListener('click', function() {
+      exibirModalFavoritos(favoritos);
+    });
+  }
+  
+  // Limpa a instância do modal quando ele é fechado
+  const modalElement = document.getElementById('modalFavoritos');
+  if (modalElement) {
+    modalElement.addEventListener('hidden.bs.modal', function() {
+      // Não destruímos a instância, apenas limpamos event listeners conflitantes
+      const modalBody = modalElement.querySelector('.modal-body');
+      const lista = modalBody.querySelector('.list-group');
+      if (lista) {
+        // Remove event listeners substituindo o elemento
+        const novaLista = lista.cloneNode(false);
+        modalBody.replaceChild(novaLista, lista);
+      }
+    });
+  }
+});
+
 // Função para preencher e exibir o modal
 function exibirModalPersonagem(personagem) {
   // Atualiza o título do modal
@@ -130,6 +323,8 @@ function adicionaCards(listaPersonagens) {
     const cardDiv = document.createElement('div');
     cardDiv.classList.add('personagem-card');
     
+    // Verifica se o personagem já é favorito
+    const favoritado = isFavorito(personagem);
 
     // Cabeçalho do card
     const cardHeader = document.createElement('div');
@@ -143,8 +338,25 @@ function adicionaCards(listaPersonagens) {
     subtitle.classList.add('personagem-card-subtitle');
     subtitle.textContent = `Nascimento: ${personagem.birth_year}`;
     
+    // Botão de favorito
+    const botaoFavorito = document.createElement('button');
+    botaoFavorito.classList.add('btn-favorito');
+    if (favoritado) {
+      botaoFavorito.innerHTML = '<i class="fas fa-heart"></i>';
+      botaoFavorito.classList.add('favoritado');
+    } else {
+      botaoFavorito.innerHTML = '<i class="far fa-heart"></i>';
+    }
+    
+    // Evento para favoritar/desfavoritar
+    botaoFavorito.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorito(personagem, botaoFavorito);
+    });
+    
     cardHeader.appendChild(title);
     cardHeader.appendChild(subtitle);
+    cardHeader.appendChild(botaoFavorito);
     
     // Corpo do card
     const cardBody = document.createElement('div');
@@ -247,4 +459,4 @@ document.addEventListener('DOMContentLoaded', async function () {
   } catch (error) {
     console.error('Erro ao inicializar a página:', error);
   }
-});
+}); 

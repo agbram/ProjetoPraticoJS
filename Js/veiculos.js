@@ -1,4 +1,3 @@
-// Função assíncrona para buscar dados da SWAPI
 async function buscarDados(endpoint) {
   const url = `https://swapi.dev/api/${endpoint}`;
 
@@ -17,6 +16,199 @@ async function buscarDados(endpoint) {
     return [];
   }
 }
+
+// Pega do localStorage
+let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+// Função para verificar se um veículo é favorito
+function isFavorito(veiculo) {
+  return favoritos.some(fav => fav.name === veiculo.name);
+}
+
+// Função para favoritar/desfavoritar veículo
+function toggleFavorito(veiculo, botaoFavorito = null) {
+  const index = favoritos.findIndex(fav => fav.name === veiculo.name);
+  
+  if (index === -1) {
+    // Adicionar aos favoritos
+    favoritos.push(veiculo);
+    if (botaoFavorito) {
+      botaoFavorito.innerHTML = '<i class="fas fa-heart"></i>';
+      botaoFavorito.classList.add('favoritado');
+    }
+  } else {
+    // Remover dos favoritos
+    favoritos.splice(index, 1);
+    if (botaoFavorito) {
+      botaoFavorito.innerHTML = '<i class="far fa-heart"></i>';
+      botaoFavorito.classList.remove('favoritado');
+    }
+  }
+  
+  // Atualizar localStorage
+  localStorage.setItem("favoritos", JSON.stringify(favoritos));
+  
+  // Atualizar todos os botões de favorito na página
+  atualizarBotoesFavorito();
+}
+
+// Função para atualizar todos os botões de favorito na página
+function atualizarBotoesFavorito() {
+  const botoesFavorito = document.querySelectorAll('.btn-favorito');
+  
+  botoesFavorito.forEach(botao => {
+    const card = botao.closest('.veiculo-card');
+    const titulo = card.querySelector('.veiculo-card-title');
+    if (titulo) {
+      const nomeVeiculo = titulo.textContent;
+      const veiculoEncontrado = favoritos.find(fav => fav.name === nomeVeiculo);
+      
+      if (veiculoEncontrado) {
+        botao.innerHTML = '<i class="fas fa-heart"></i>';
+        botao.classList.add('favoritado');
+      } else {
+        botao.innerHTML = '<i class="far fa-heart"></i>';
+        botao.classList.remove('favoritado');
+      }
+    }
+  });
+}
+
+// Variável para controlar a instância do modal
+let modalFavoritosInstance = null;
+
+// Função para montar e exibir modal de favoritos
+function exibirModalFavoritos(lista) {
+  const modalElement = document.getElementById("modalFavoritos");
+  const modalBody = modalElement.querySelector(".modal-body");
+  
+  // Limpa o conteúdo anterior
+  modalBody.innerHTML = "";
+  
+  // Remove event listeners antigos se existirem
+  const listaAntiga = modalBody.querySelector('.list-group');
+  if (listaAntiga) {
+    listaAntiga.remove();
+  }
+  
+  // Caso não tenha favoritos
+  if (lista.length === 0) {
+    modalBody.innerHTML = `
+      <div class="text-center py-4">
+        <i class="fas fa-heart-broken fa-3x text-muted mb-3"></i>
+        <h5>Nenhum favorito salvo</h5>
+        <p class="text-muted">Adicione alguns veículos aos seus favoritos para vê-los aqui.</p>
+      </div>
+    `;
+  } else {
+    // Cria a lista de favoritos
+    const listaFavoritos = document.createElement("div");
+    listaFavoritos.className = "list-group";
+    
+    lista.forEach((veiculo, indice) => {
+      const item = document.createElement("div");
+      item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
+      item.setAttribute('data-veiculo-nome', veiculo.name);
+      
+      item.innerHTML = `
+        <div class="flex-grow-1">
+          <h6 class="mb-1">${veiculo.name}</h6>
+          <small class="text-muted">${veiculo.model} • ${veiculo.manufacturer}</small>
+        </div>
+        <button class="btn btn-outline-danger btn-sm btn-remover-favorito ms-2" data-nome="${veiculo.name}">
+          <i class="fas fa-trash"></i>
+        </button>
+      `;
+      
+      listaFavoritos.appendChild(item);
+    });
+    
+    modalBody.appendChild(listaFavoritos);
+    
+    // Adiciona event delegation para os botões de remover
+    listaFavoritos.addEventListener('click', function(e) {
+      const botaoRemover = e.target.closest('.btn-remover-favorito');
+      if (botaoRemover) {
+        e.preventDefault();
+        e.stopPropagation();
+        const nomeVeiculo = botaoRemover.getAttribute('data-nome');
+        removerFavoritoPorNome(nomeVeiculo);
+        return;
+      }
+      
+      // Se clicou no item (não no botão de remover)
+      const item = e.target.closest('.list-group-item');
+      if (item && !e.target.closest('.btn-remover-favorito')) {
+        const nomeVeiculo = item.getAttribute('data-veiculo-nome');
+        const veiculo = favoritos.find(fav => fav.name === nomeVeiculo);
+        if (veiculo) {
+          // Fecha o modal de favoritos
+          if (modalFavoritosInstance) {
+            modalFavoritosInstance.hide();
+          }
+          
+          // Abre o modal com os detalhes do veículo
+          exibirModalVeiculo(veiculo);
+        }
+      }
+    });
+  }
+  
+  // Cria ou obtém a instância do modal
+  if (!modalFavoritosInstance) {
+    modalFavoritosInstance = new bootstrap.Modal(modalElement);
+  }
+  
+  // Exibe o modal
+  modalFavoritosInstance.show();
+}
+
+// Função que remove favorito por nome e atualiza a interface
+function removerFavoritoPorNome(nomeVeiculo) {
+  const index = favoritos.findIndex(fav => fav.name === nomeVeiculo);
+  
+  if (index !== -1) {
+    favoritos.splice(index, 1);
+    localStorage.setItem("favoritos", JSON.stringify(favoritos));
+    
+    // Atualiza a interface
+    atualizarBotoesFavorito();
+    
+    // Se o modal de favoritos estiver aberto, atualiza ele também
+    const modalElement = document.getElementById('modalFavoritos');
+    if (modalElement.classList.contains('show')) {
+      // Pequeno delay para garantir a atualização
+      setTimeout(() => {
+        exibirModalFavoritos(favoritos);
+      }, 100);
+    }
+  }
+}
+
+// Evento para abrir modal de favoritos
+document.addEventListener('DOMContentLoaded', function() {
+  const botaoFavoritos = document.getElementById('btnFavoritos');
+  if (botaoFavoritos) {
+    botaoFavoritos.addEventListener('click', function() {
+      exibirModalFavoritos(favoritos);
+    });
+  }
+  
+  // Limpa a instância do modal quando ele é fechado
+  const modalElement = document.getElementById('modalFavoritos');
+  if (modalElement) {
+    modalElement.addEventListener('hidden.bs.modal', function() {
+      // Não destruímos a instância, apenas limpamos event listeners conflitantes
+      const modalBody = modalElement.querySelector('.modal-body');
+      const lista = modalBody.querySelector('.list-group');
+      if (lista) {
+        // Remove event listeners substituindo o elemento
+        const novaLista = lista.cloneNode(false);
+        modalBody.replaceChild(novaLista, lista);
+      }
+    });
+  }
+});
 
 // Função para preencher e exibir o modal
 function exibirModalVeiculo(veiculo) {
@@ -96,7 +288,6 @@ function exibirModalVeiculo(veiculo) {
     specsGroup.appendChild(item);
   });
   
-  // Grupo 3: Tripulação e Passageiros
   const crewGroup = document.createElement('div');
   crewGroup.classList.add('veiculo-detail-group');
   
@@ -196,6 +387,8 @@ function adicionaCards(listaVeiculos) {
     const cardDiv = document.createElement('div');
     cardDiv.classList.add('veiculo-card');
     
+    // Verifica se o veículo já é favorito
+    const favoritado = isFavorito(veiculo);
 
     // Cabeçalho do card
     const cardHeader = document.createElement('div');
@@ -213,9 +406,26 @@ function adicionaCards(listaVeiculos) {
     badge.classList.add('veiculo-badge');
     badge.textContent = veiculo.vehicle_class;
     
+    // Botão de favorito
+    const botaoFavorito = document.createElement('button');
+    botaoFavorito.classList.add('btn-favorito');
+    if (favoritado) {
+      botaoFavorito.innerHTML = '<i class="fas fa-heart"></i>';
+      botaoFavorito.classList.add('favoritado');
+    } else {
+      botaoFavorito.innerHTML = '<i class="far fa-heart"></i>';
+    }
+    
+    // Evento para favoritar/desfavoritar
+    botaoFavorito.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorito(veiculo, botaoFavorito);
+    });
+    
     cardHeader.appendChild(title);
     cardHeader.appendChild(subtitle);
     cardHeader.appendChild(badge);
+    cardHeader.appendChild(botaoFavorito);
     
     // Corpo do card
     const cardBody = document.createElement('div');
@@ -271,7 +481,6 @@ function adicionaCards(listaVeiculos) {
   });
 }
 
-
 // Inicialização quando a página carrega
 document.addEventListener('DOMContentLoaded', async function () {
   try {
@@ -309,3 +518,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     console.error('Erro ao inicializar a página:', error);
   }
 });
+
+// Função para filtrar veículos por nome (se não existir)
+function filtrarPorNome(veiculos, termo) {
+  return veiculos.filter(veiculo => 
+    veiculo.name.toLowerCase().includes(termo.toLowerCase())
+  );
+}
