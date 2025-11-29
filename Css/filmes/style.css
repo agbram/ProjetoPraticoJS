@@ -15,6 +15,7 @@ main {
 #listaFilmes {
   display: flex;
   gap: 5px;
+  justify-content: center;
 }
 #modalAbertura {
   color: #121212;
@@ -53,8 +54,6 @@ main {
   color: #000;
   border: 0;
   border-radius: 0.375rem;
-  opacity: 0.5;
-  filter: invert(1) grayscale(100%) brightness(200%);
 }
 #btn-favorite:hover {
   opacity: 0.75;
@@ -281,4 +280,49 @@ header {
 /* Badge para o botão de detalhes no card */
 .badge {
   font-size: 0.7em;
+}
+
+/* Estilo para o ícone de coração nos cards */
+.btn-favoritar-card {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.btn-favoritar-card:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.btn-favoritar-card.favoritado {
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.2);
+}
+
+.btn-favoritar-card.favoritado:hover {
+  background: rgba(255, 71, 87, 0.3);
+}
+
+/* Ajuste para o card ter position relative */
+.card-filme {
+  position: relative;
+}
+
+/* Garantir que o card-body não cubra o botão */
+.card-body {
+  position: relative;
+  z-index: 1;
 }

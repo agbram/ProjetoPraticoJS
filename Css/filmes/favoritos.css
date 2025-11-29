@@ -19,6 +19,7 @@
   z-index: 1030; /* Aumentado para ficar acima do footer */
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
 }
 
 .btn-favoritos-flutuante:hover {
@@ -46,7 +47,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 50px;
+  border-radius: 70px;
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.2) 0%,
@@ -108,4 +109,48 @@ footer {
 .navbar-fixed,
 .sticky-header {
   z-index: 1030; /* Similar ao botão */
+}
+
+/* TESTE */
+
+/* Estilos para a lista de favoritos no modal */
+.favorito-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  background: #18181c;
+  border-radius: 8px;
+  border-left: 4px solid #ffd700;
+}
+
+.favorito-item:hover {
+  background: #0f3460;
+}
+
+.btn-remover-favorito {
+  background: transparent;
+  border: 1px solid #f50000;
+  color: #f50000;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+}
+
+.btn-remover-favorito:hover {
+  background: #e94560;
+  color: white;
+}
+
+.empty-favorites {
+  text-align: center;
+  padding: 30px;
+  color: #6c757d;
+}
+
+.empty-favorites i {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  display: block;
 }
