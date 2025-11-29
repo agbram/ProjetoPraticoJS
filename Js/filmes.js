@@ -1,12 +1,12 @@
 // Função assíncrona para buscar dados da SWAPI
 async function buscarDados(endpoint) {
-  const url = `https://swapi.dev/api/${endpoint}`;
+  const url = "https://swapi.dev/api/" + endpoint;
 
   try {
     const resposta = await fetch(url);
 
     if (!resposta.ok) {
-      throw new Error(`Erro na requisição: ${resposta.status}`);
+      throw new Error("Erro na requisição: " + resposta.status);
     }
 
     const dados = await resposta.json();
@@ -25,18 +25,20 @@ async function buscarDadosDasURLs(urls) {
   }
 
   try {
-    const promises = urls.map((url) =>
-      fetch(url)
-        .then((response) => {
+    const promises = urls.map(function (url) {
+      return fetch(url)
+        .then(function (response) {
           if (!response.ok) throw new Error("Erro na requisição");
           return response.json();
         })
-        .then((data) => data.name || data.title)
-        .catch((error) => {
-          console.error(`Erro ao buscar ${url}:`, error);
-          return "N/A";
+        .then(function (data) {
+          return data.name || data.title;
         })
-    );
+        .catch(function (error) {
+          console.error("Erro ao buscar " + url + ":", error);
+          return "N/A";
+        });
+    });
 
     return await Promise.all(promises);
   } catch (error) {
@@ -58,7 +60,7 @@ function mostrarLoadingModal() {
     "modalEspecies",
   ];
 
-  elementosLoading.forEach((id) => {
+  elementosLoading.forEach(function (id) {
     const elemento = document.getElementById(id);
     if (elemento) {
       elemento.innerHTML = '<li class="text-muted">Carregando...</li>';
@@ -78,7 +80,7 @@ function preencherListaModal(elementId, itens) {
     return;
   }
 
-  itens.forEach((item) => {
+  itens.forEach(function (item) {
     const li = document.createElement("li");
     li.classList.add("mb-1");
     li.textContent = item;
@@ -102,7 +104,7 @@ function adicionaCards(listaFilmes) {
     return;
   }
 
-  listaFilmes.forEach((filme) => {
+  listaFilmes.forEach(function (filme) {
     const cardDiv = document.createElement("div");
     cardDiv.classList.add("filme-card");
     cardDiv.setAttribute("data-episode-id", filme.episode_id);
@@ -114,9 +116,14 @@ function adicionaCards(listaFilmes) {
 
     // Verificar se o filme já está favoritado
     const favoritos = JSON.parse(localStorage.getItem("filmesFavoritos")) || [];
-    const isFavoritado = favoritos.some(
-      (fav) => fav.episode_id === filme.episode_id
-    );
+    let isFavoritado = false;
+
+    for (let i = 0; i < favoritos.length; i++) {
+      if (favoritos[i].episode_id === filme.episode_id) {
+        isFavoritado = true;
+        break;
+      }
+    }
 
     if (isFavoritado) {
       btnFavoritar.innerHTML = '<i class="fas fa-heart"></i>';
@@ -124,7 +131,7 @@ function adicionaCards(listaFilmes) {
     }
 
     // Prevenir que o clique no coração abra o modal
-    btnFavoritar.addEventListener("click", (e) => {
+    btnFavoritar.addEventListener("click", function (e) {
       e.stopPropagation(); // Impede que o evento chegue até o card
       toggleFavorito(filme, btnFavoritar);
     });
@@ -138,7 +145,7 @@ function adicionaCards(listaFilmes) {
 
     const cardSubtitle = document.createElement("p");
     cardSubtitle.classList.add("filme-card-subtitle");
-    cardSubtitle.textContent = `Episódio ${filme.episode_id}`;
+    cardSubtitle.textContent = "Episódio " + filme.episode_id;
 
     const cardBody = document.createElement("div");
     cardBody.classList.add("filme-card-body");
@@ -158,24 +165,27 @@ function adicionaCards(listaFilmes) {
     const dataFeature = document.createElement("div");
     dataFeature.classList.add("filme-feature");
     const dataLancamento = filme.release_date;
-    let dataFormatada;
+    let dataFormatada = dataLancamento;
+
     if (dataLancamento) {
       const data = new Date(dataLancamento);
       if (!isNaN(data.getTime())) {
         dataFormatada = data.toLocaleDateString("pt-BR");
       }
     }
+
     dataFeature.innerHTML = `
       <span class="feature-label">Lançamento</span>
-      <span class="feature-value">${dataFormatada || dataLancamento}</span>
+      <span class="feature-value">${dataFormatada}</span>
     `;
 
     // Produtor
     const produtorFeature = document.createElement("div");
     produtorFeature.classList.add("filme-feature");
+    const primeiroProdutor = filme.producer.split(",")[0];
     produtorFeature.innerHTML = `
       <span class="feature-label">Produtor</span>
-      <span class="feature-value">${filme.producer.split(",")[0]}</span>
+      <span class="feature-value">${primeiroProdutor}</span>
     `;
 
     const cardFooter = document.createElement("div");
@@ -205,8 +215,8 @@ function adicionaCards(listaFilmes) {
     container.appendChild(cardDiv);
 
     // Evento de abrir modal
-    cardDiv.addEventListener("click", async () => {
-      await abrirModalFilme(filme);
+    cardDiv.addEventListener("click", function () {
+      abrirModalFilme(filme);
     });
   });
 }
@@ -214,29 +224,40 @@ function adicionaCards(listaFilmes) {
 // Função para alternar entre favoritar e desfavoritar
 function toggleFavorito(filme, btnElement) {
   let favoritos = JSON.parse(localStorage.getItem("filmesFavoritos")) || [];
-  const isFavoritado = favoritos.some(
-    (fav) => fav.episode_id === filme.episode_id
-  );
+  let isFavoritado = false;
+
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].episode_id === filme.episode_id) {
+      isFavoritado = true;
+      break;
+    }
+  }
 
   if (isFavoritado) {
     // Remover dos favoritos
-    favoritos = favoritos.filter((fav) => fav.episode_id !== filme.episode_id);
+    const novosFavoritos = [];
+    for (let i = 0; i < favoritos.length; i++) {
+      if (favoritos[i].episode_id !== filme.episode_id) {
+        novosFavoritos.push(favoritos[i]);
+      }
+    }
+    favoritos = novosFavoritos;
     btnElement.innerHTML = '<i class="far fa-heart"></i>';
     btnElement.classList.remove("favoritado");
-    console.log(`❌ "${filme.title}" removido dos favoritos`);
+    console.log('❌ "' + filme.title + '" removido dos favoritos');
   } else {
     // Adicionar aos favoritos
     favoritos.push(filme);
     btnElement.innerHTML = '<i class="fas fa-heart"></i>';
     btnElement.classList.add("favoritado");
-    console.log(`✅ "${filme.title}" adicionado aos favoritos`);
+    console.log('✅ "' + filme.title + '" adicionado aos favoritos');
   }
 
   localStorage.setItem("filmesFavoritos", JSON.stringify(favoritos));
 
   // Feedback visual
   btnElement.style.transform = "scale(1.3)";
-  setTimeout(() => {
+  setTimeout(function () {
     btnElement.style.transform = "scale(1)";
   }, 300);
 }
@@ -244,36 +265,40 @@ function toggleFavorito(filme, btnElement) {
 // Função para abrir modal do filme
 async function abrirModalFilme(filme) {
   // Preencher informações básicas do modal
-  document.getElementById("modalTitulo").textContent = filme.title;
-  document.getElementById("modalDiretor").textContent = filme.director;
-  document.getElementById("modalProdutor").textContent = filme.producer;
-  document.getElementById("modalAbertura").textContent = filme.opening_crawl;
+  const modalTitulo = document.getElementById("modalTitulo");
+  const modalDiretor = document.getElementById("modalDiretor");
+  const modalProdutor = document.getElementById("modalProdutor");
+  const modalAbertura = document.getElementById("modalAbertura");
+  const modalDataLancamento = document.getElementById("modalDataLancamento");
+
+  modalTitulo.textContent = filme.title;
+  modalDiretor.textContent = filme.director;
+  modalProdutor.textContent = filme.producer;
+  modalAbertura.textContent = filme.opening_crawl;
 
   // Formatar data
   const dataLancamento = filme.release_date;
-  let dataFormatada;
+  let dataFormatada = dataLancamento;
+
   if (dataLancamento) {
     const data = new Date(dataLancamento);
     if (!isNaN(data.getTime())) {
       dataFormatada = data.toLocaleDateString("pt-BR");
     }
   }
-  document.getElementById("modalDataLancamento").textContent =
-    dataFormatada || dataLancamento;
+
+  modalDataLancamento.textContent = dataFormatada;
 
   // Mostrar loading nas listas
   mostrarLoadingModal();
 
   // Buscar dados adicionais em paralelo
   try {
-    const [personagens, planetas, naves, veiculos, especies] =
-      await Promise.all([
-        buscarDadosDasURLs(filme.characters),
-        buscarDadosDasURLs(filme.planets),
-        buscarDadosDasURLs(filme.starships),
-        buscarDadosDasURLs(filme.vehicles),
-        buscarDadosDasURLs(filme.species),
-      ]);
+    const personagens = await buscarDadosDasURLs(filme.characters);
+    const planetas = await buscarDadosDasURLs(filme.planets);
+    const naves = await buscarDadosDasURLs(filme.starships);
+    const veiculos = await buscarDadosDasURLs(filme.vehicles);
+    const especies = await buscarDadosDasURLs(filme.species);
 
     // Preencher as listas no modal
     preencherListaModal("modalPersonagens", personagens);
@@ -295,10 +320,14 @@ async function abrirModalFilme(filme) {
 
   if (jaFavoritado) {
     buttonFavorites.textContent = "Remover dos Favoritos ❌";
-    buttonFavorites.onclick = () => removerDosFavoritos(filme.episode_id);
+    buttonFavorites.onclick = function () {
+      removerDosFavoritos(filme.episode_id);
+    };
   } else {
     buttonFavorites.textContent = "Favoritar ⭐";
-    buttonFavorites.onclick = () => adicionarAosFavoritos(filme);
+    buttonFavorites.onclick = function () {
+      adicionarAosFavoritos(filme);
+    };
   }
 
   // Abrir modal
@@ -310,21 +339,39 @@ async function abrirModalFilme(filme) {
 // Função para verificar se filme já está favoritado
 function verificarSeJaFavoritado(filme) {
   const favoritos = obterFavoritos();
-  return favoritos.some((f) => f.episode_id === filme.episode_id);
+
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].episode_id === filme.episode_id) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // Função para filtrar filmes pelo texto digitado
 function filtrarPorNome(lista, textoUsuario) {
   const textoEmMinusculo = textoUsuario.toLowerCase();
-  return lista.filter((filme) => {
-    return filme.title.toLowerCase().includes(textoEmMinusculo);
-  });
+  const filmesFiltrados = [];
+
+  for (let i = 0; i < lista.length; i++) {
+    const filme = lista[i];
+    if (filme.title.toLowerCase().includes(textoEmMinusculo)) {
+      filmesFiltrados.push(filme);
+    }
+  }
+
+  return filmesFiltrados;
 }
 
 // Funções para gerenciar favoritos
 function obterFavoritos() {
   const favoritos = localStorage.getItem("filmesFavoritos");
-  return favoritos ? JSON.parse(favoritos) : [];
+  if (favoritos) {
+    return JSON.parse(favoritos);
+  } else {
+    return [];
+  }
 }
 
 function salvarFavoritos(favoritos) {
@@ -333,15 +380,25 @@ function salvarFavoritos(favoritos) {
 
 function adicionarAosFavoritos(filme) {
   const favoritos = obterFavoritos();
+  let jaExiste = false;
 
-  if (!favoritos.some((f) => f.episode_id === filme.episode_id)) {
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].episode_id === filme.episode_id) {
+      jaExiste = true;
+      break;
+    }
+  }
+
+  if (!jaExiste) {
     favoritos.push(filme);
     salvarFavoritos(favoritos);
 
     // Atualizar botão no modal
     const buttonFavorites = document.getElementById("btn-favorite");
     buttonFavorites.textContent = "Remover dos Favoritos ❌";
-    buttonFavorites.onclick = () => removerDosFavoritos(filme.episode_id);
+    buttonFavorites.onclick = function () {
+      removerDosFavoritos(filme.episode_id);
+    };
 
     atualizarBotaoCard(filme.episode_id);
 
@@ -352,18 +409,38 @@ function adicionarAosFavoritos(filme) {
 
 function removerDosFavoritos(episodeId) {
   let favoritos = obterFavoritos();
-  favoritos = favoritos.filter((f) => f.episode_id !== episodeId);
+  const novosFavoritos = [];
+
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].episode_id !== episodeId) {
+      novosFavoritos.push(favoritos[i]);
+    }
+  }
+
+  favoritos = novosFavoritos;
   salvarFavoritos(favoritos);
 
   // Atualizar botão no modal
   const buttonFavorites = document.getElementById("btn-favorite");
   buttonFavorites.textContent = "Favoritar ⭐";
-  buttonFavorites.onclick = () => {
-    const filmeAtual = filmes.find((f) => f.episode_id === episodeId);
-    if (filmeAtual) adicionarAosFavoritos(filmeAtual);
+  buttonFavorites.onclick = function () {
+    const filmeAtual = encontrarFilmePorEpisodeId(episodeId);
+    if (filmeAtual) {
+      adicionarAosFavoritos(filmeAtual);
+    }
   };
 
   atualizarBotaoCard(episodeId);
+}
+
+// Função auxiliar para encontrar filme por episode_id
+function encontrarFilmePorEpisodeId(episodeId) {
+  for (let i = 0; i < filmes.length; i++) {
+    if (filmes[i].episode_id === episodeId) {
+      return filmes[i];
+    }
+  }
+  return null;
 }
 
 function atualizarListaFavoritos() {
@@ -381,61 +458,67 @@ function atualizarListaFavoritos() {
     return;
   }
 
-  listaFavoritos.innerHTML = favoritos
-    .map((filme) => {
-      // Formatar data igual no modal
-      const dataLancamento = filme.release_date;
-      let dataFormatada;
-      if (dataLancamento) {
-        const data = new Date(dataLancamento);
-        if (!isNaN(data.getTime())) {
-          dataFormatada = data.toLocaleDateString("pt-BR");
-        }
-      }
+  let htmlFavoritos = "";
 
-      return `
+  for (let i = 0; i < favoritos.length; i++) {
+    const filme = favoritos[i];
+
+    // Formatar data igual no modal
+    const dataLancamento = filme.release_date;
+    let dataFormatada = dataLancamento;
+
+    if (dataLancamento) {
+      const data = new Date(dataLancamento);
+      if (!isNaN(data.getTime())) {
+        dataFormatada = data.toLocaleDateString("pt-BR");
+      }
+    }
+
+    htmlFavoritos += `
       <div class="favorito-item">
         <div>
           <h5 class="mb-1">${filme.title}</h5>
           <p class="mb-1"><strong>Diretor:</strong> ${filme.director}</p>
-          <p class="mb-1"><strong>Lançamento:</strong> ${
-            dataFormatada || dataLancamento
-          }</p>
+          <p class="mb-1"><strong>Lançamento:</strong> ${dataFormatada}</p>
         </div>
         <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-outline-light" onclick="abrirDetalhesFilme(${
-            filme.episode_id
-          })">
+          <button class="btn btn-sm btn-outline-light" onclick="abrirDetalhesFilme(${filme.episode_id})">
             Ver Detalhes
           </button>
-          <button class="btn btn-sm btn-remover-favorito" onclick="removerDosFavoritos(${
-            filme.episode_id
-          }); atualizarListaFavoritos();">
+          <button class="btn btn-sm btn-remover-favorito" onclick="removerDosFavoritos(${filme.episode_id}); atualizarListaFavoritos();">
             Remover
           </button>
         </div>
       </div>
     `;
-    })
-    .join("");
+  }
+
+  listaFavoritos.innerHTML = htmlFavoritos;
 }
 
 // Função para abrir detalhes do filme a partir dos favoritos
 function abrirDetalhesFilme(episodeId) {
   const favoritos = obterFavoritos();
-  const filme = favoritos.find((f) => f.episode_id === episodeId);
+  let filmeEncontrado = null;
 
-  if (filme) {
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].episode_id === episodeId) {
+      filmeEncontrado = favoritos[i];
+      break;
+    }
+  }
+
+  if (filmeEncontrado) {
     // Fechar modal de favoritos
-    const favoritosModal = bootstrap.Modal.getInstance(
-      document.getElementById("favoritosModal")
-    );
+    const favoritosModalElement = document.getElementById("favoritosModal");
+    const favoritosModal = bootstrap.Modal.getInstance(favoritosModalElement);
+
     if (favoritosModal) {
       favoritosModal.hide();
     }
 
     // Abrir modal de detalhes
-    abrirModalFilme(filme);
+    abrirModalFilme(filmeEncontrado);
   }
 }
 
@@ -469,9 +552,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     const btnFavoritos = document.getElementById("btnFavoritos");
     btnFavoritos.addEventListener("click", function () {
       atualizarListaFavoritos();
-      const favoritosModal = new bootstrap.Modal(
-        document.getElementById("favoritosModal")
-      );
+      const favoritosModalElement = document.getElementById("favoritosModal");
+      const favoritosModal = new bootstrap.Modal(favoritosModalElement);
       favoritosModal.show();
     });
   } catch (error) {
@@ -483,13 +565,20 @@ document.addEventListener("DOMContentLoaded", async function () {
 // Função para atualizar o botão do card quando favoritar pelo modal
 function atualizarBotaoCard(episodeId) {
   const card = document.querySelector(
-    `.filme-card[data-episode-id="${episodeId}"]`
+    '.filme-card[data-episode-id="' + episodeId + '"]'
   );
 
   if (card) {
     const btnFavoritar = card.querySelector(".btn-favorito");
     const favoritos = JSON.parse(localStorage.getItem("filmesFavoritos")) || [];
-    const isFavoritado = favoritos.some((fav) => fav.episode_id === episodeId);
+    let isFavoritado = false;
+
+    for (let i = 0; i < favoritos.length; i++) {
+      if (favoritos[i].episode_id === episodeId) {
+        isFavoritado = true;
+        break;
+      }
+    }
 
     if (isFavoritado) {
       btnFavoritar.innerHTML = '<i class="fas fa-heart"></i>';
@@ -501,25 +590,23 @@ function atualizarBotaoCard(episodeId) {
 
     // Feedback visual
     btnFavoritar.style.transform = "scale(1.3)";
-    setTimeout(() => {
+    setTimeout(function () {
       btnFavoritar.style.transform = "scale(1)";
     }, 300);
   }
 }
 
 async function buscarComCache(endpoint) {
-  const chave = `cache_${endpoint}`;
+  const chave = "cache_" + endpoint;
 
   // 1. Tenta pegar do cache
   const cache = localStorage.getItem(chave);
 
   if (cache) {
-    console.log(`🔵 Usando cache de ${endpoint}`);
     return JSON.parse(cache);
   }
 
   // 2. Se não tiver cache → faz fetch normalmente
-  console.log(`🟡 Buscando ${endpoint} da API...`);
   const dados = await buscarDados(endpoint);
 
   // 3. Salva no cache

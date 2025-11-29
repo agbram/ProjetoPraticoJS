@@ -765,3 +765,6 @@ footer {
   color: var(--text-muted) !important;
 }
 
+.text-primary{
+  color: #ffc107 !important;
+}

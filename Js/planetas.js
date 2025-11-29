@@ -1,12 +1,12 @@
 // Função assíncrona para buscar dados da SWAPI
 async function buscarDados(endpoint) {
-  const url = `https://swapi.dev/api/${endpoint}`;
+  const url = "https://swapi.dev/api/" + endpoint;
 
   try {
     const resposta = await fetch(url);
 
     if (!resposta.ok) {
-      throw new Error(`Erro na requisição: ${resposta.status}`);
+      throw new Error("Erro na requisição: " + resposta.status);
     }
 
     const dados = await resposta.json();
@@ -25,18 +25,20 @@ async function buscarDadosDasURLs(urls) {
   }
 
   try {
-    const promises = urls.map((url) =>
-      fetch(url)
-        .then((response) => {
+    const promises = urls.map(function (url) {
+      return fetch(url)
+        .then(function (response) {
           if (!response.ok) throw new Error("Erro na requisição");
           return response.json();
         })
-        .then((data) => data.name || data.title)
-        .catch((error) => {
-          console.error(`Erro ao buscar ${url}:`, error);
-          return "N/A";
+        .then(function (data) {
+          return data.name || data.title;
         })
-    );
+        .catch(function (error) {
+          console.error("Erro ao buscar " + url + ":", error);
+          return "N/A";
+        });
+    });
 
     return await Promise.all(promises);
   } catch (error) {
@@ -52,7 +54,7 @@ let planetas = [];
 function mostrarLoadingModal() {
   const elementosLoading = ["modalResidentes", "modalFilmes"];
 
-  elementosLoading.forEach((id) => {
+  elementosLoading.forEach(function (id) {
     const elemento = document.getElementById(id);
     if (elemento) {
       elemento.innerHTML = '<li class="text-muted">Carregando...</li>';
@@ -72,7 +74,7 @@ function preencherListaModal(elementId, itens) {
     return;
   }
 
-  itens.forEach((item) => {
+  itens.forEach(function (item) {
     const li = document.createElement("li");
     li.classList.add("mb-1");
     li.textContent = item;
@@ -96,7 +98,7 @@ function adicionaCards(listaPlanetas) {
     return;
   }
 
-  listaPlanetas.forEach((planeta) => {
+  listaPlanetas.forEach(function (planeta) {
     const cardDiv = document.createElement("div");
     cardDiv.classList.add("planeta-card");
     cardDiv.setAttribute("data-planeta-id", planeta.name);
@@ -109,7 +111,14 @@ function adicionaCards(listaPlanetas) {
     // Verificar se o planeta já está favoritado
     const favoritos =
       JSON.parse(localStorage.getItem("planetasFavoritos")) || [];
-    const isFavoritado = favoritos.some((fav) => fav.name === planeta.name);
+    let isFavoritado = false;
+
+    for (let i = 0; i < favoritos.length; i++) {
+      if (favoritos[i].name === planeta.name) {
+        isFavoritado = true;
+        break;
+      }
+    }
 
     if (isFavoritado) {
       btnFavoritar.innerHTML = '<i class="fas fa-heart"></i>';
@@ -117,7 +126,7 @@ function adicionaCards(listaPlanetas) {
     }
 
     // Prevenir que o clique no coração abra o modal
-    btnFavoritar.addEventListener("click", (e) => {
+    btnFavoritar.addEventListener("click", function (e) {
       e.stopPropagation(); // Impede que o evento chegue até o card
       toggleFavorito(planeta, btnFavoritar);
     });
@@ -131,7 +140,7 @@ function adicionaCards(listaPlanetas) {
 
     const cardSubtitle = document.createElement("p");
     cardSubtitle.classList.add("planeta-card-subtitle");
-    cardSubtitle.textContent = `Clima: ${planeta.climate}`;
+    cardSubtitle.textContent = "Clima: " + planeta.climate;
 
     const cardBody = document.createElement("div");
     cardBody.classList.add("planeta-card-body");
@@ -142,37 +151,43 @@ function adicionaCards(listaPlanetas) {
     // População
     const populacaoFeature = document.createElement("div");
     populacaoFeature.classList.add("planeta-feature");
+
+    let populacaoTexto = "Desconhecida";
+    if (planeta.population !== "unknown") {
+      populacaoTexto = parseInt(planeta.population).toLocaleString("pt-BR");
+    }
+
     populacaoFeature.innerHTML = `
       <span class="feature-label">População</span>
-      <span class="feature-value">${
-        planeta.population !== "unknown"
-          ? parseInt(planeta.population).toLocaleString("pt-BR")
-          : "Desconhecida"
-      }</span>
+      <span class="feature-value">${populacaoTexto}</span>
     `;
 
     // Diâmetro
     const diametroFeature = document.createElement("div");
     diametroFeature.classList.add("planeta-feature");
+
+    let diametroTexto = "Desconhecido";
+    if (planeta.diameter !== "unknown") {
+      diametroTexto = planeta.diameter + " km";
+    }
+
     diametroFeature.innerHTML = `
       <span class="feature-label">Diâmetro</span>
-      <span class="feature-value">${
-        planeta.diameter !== "unknown"
-          ? `${planeta.diameter} km`
-          : "Desconhecido"
-      }</span>
+      <span class="feature-value">${diametroTexto}</span>
     `;
 
     // Terreno
     const terrenoFeature = document.createElement("div");
     terrenoFeature.classList.add("planeta-feature");
+
+    let terrenoTexto = "Desconhecido";
+    if (planeta.terrain !== "unknown") {
+      terrenoTexto = planeta.terrain.split(", ")[0];
+    }
+
     terrenoFeature.innerHTML = `
       <span class="feature-label">Terreno</span>
-      <span class="feature-value">${
-        planeta.terrain !== "unknown"
-          ? planeta.terrain.split(", ")[0]
-          : "Desconhecido"
-      }</span>
+      <span class="feature-value">${terrenoTexto}</span>
     `;
 
     const cardFooter = document.createElement("div");
@@ -202,8 +217,8 @@ function adicionaCards(listaPlanetas) {
     container.appendChild(cardDiv);
 
     // Evento de abrir modal
-    cardDiv.addEventListener("click", async () => {
-      await abrirModalPlaneta(planeta);
+    cardDiv.addEventListener("click", function () {
+      abrirModalPlaneta(planeta);
     });
   });
 }
@@ -211,27 +226,40 @@ function adicionaCards(listaPlanetas) {
 // Função para alternar entre favoritar e desfavoritar
 function toggleFavorito(planeta, btnElement) {
   let favoritos = JSON.parse(localStorage.getItem("planetasFavoritos")) || [];
-  const isFavoritado = favoritos.some((fav) => fav.name === planeta.name);
+  let isFavoritado = false;
+
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].name === planeta.name) {
+      isFavoritado = true;
+      break;
+    }
+  }
 
   if (isFavoritado) {
     // Remover dos favoritos
-    favoritos = favoritos.filter((fav) => fav.name !== planeta.name);
+    const novosFavoritos = [];
+    for (let i = 0; i < favoritos.length; i++) {
+      if (favoritos[i].name !== planeta.name) {
+        novosFavoritos.push(favoritos[i]);
+      }
+    }
+    favoritos = novosFavoritos;
     btnElement.innerHTML = '<i class="far fa-heart"></i>';
     btnElement.classList.remove("favoritado");
-    console.log(`❌ "${planeta.name}" removido dos favoritos`);
+    console.log('❌ "' + planeta.name + '" removido dos favoritos');
   } else {
     // Adicionar aos favoritos
     favoritos.push(planeta);
     btnElement.innerHTML = '<i class="fas fa-heart"></i>';
     btnElement.classList.add("favoritado");
-    console.log(`✅ "${planeta.name}" adicionado aos favoritos`);
+    console.log('✅ "' + planeta.name + '" adicionado aos favoritos');
   }
 
   localStorage.setItem("planetasFavoritos", JSON.stringify(favoritos));
 
   // Feedback visual
   btnElement.style.transform = "scale(1.3)";
-  setTimeout(() => {
+  setTimeout(function () {
     btnElement.style.transform = "scale(1)";
   }, 300);
 }
@@ -239,37 +267,55 @@ function toggleFavorito(planeta, btnElement) {
 // Função para abrir modal do planeta
 async function abrirModalPlaneta(planeta) {
   // Preencher informações básicas do modal
-  document.getElementById("modalNome").textContent = planeta.name;
-  document.getElementById("modalClima").textContent = planeta.climate;
-  document.getElementById("modalDiametro").textContent =
-    planeta.diameter !== "unknown" ? `${planeta.diameter} km` : "Desconhecido";
-  document.getElementById("modalGravidade").textContent = planeta.gravity;
-  document.getElementById("modalPopulacao").textContent =
-    planeta.population !== "unknown"
-      ? parseInt(planeta.population).toLocaleString("pt-BR")
-      : "Desconhecida";
-  document.getElementById(
-    "modalPeriodoOrbital"
-  ).textContent = `${planeta.orbital_period} dias`;
-  document.getElementById(
-    "modalPeriodoRotacao"
-  ).textContent = `${planeta.rotation_period} horas`;
-  document.getElementById("modalAguaSuperficial").textContent =
-    planeta.surface_water !== "unknown"
-      ? `${planeta.surface_water}%`
-      : "Desconhecida";
+  const modalNome = document.getElementById("modalNome");
+  const modalClima = document.getElementById("modalClima");
+  const modalDiametro = document.getElementById("modalDiametro");
+  const modalGravidade = document.getElementById("modalGravidade");
+  const modalPopulacao = document.getElementById("modalPopulacao");
+  const modalPeriodoOrbital = document.getElementById("modalPeriodoOrbital");
+  const modalPeriodoRotacao = document.getElementById("modalPeriodoRotacao");
+  const modalAguaSuperficial = document.getElementById("modalAguaSuperficial");
+
+  modalNome.textContent = planeta.name;
+  modalClima.textContent = planeta.climate;
+
+  if (planeta.diameter !== "unknown") {
+    modalDiametro.textContent = planeta.diameter + " km";
+  } else {
+    modalDiametro.textContent = "Desconhecido";
+  }
+
+  modalGravidade.textContent = planeta.gravity;
+
+  if (planeta.population !== "unknown") {
+    modalPopulacao.textContent = parseInt(planeta.population).toLocaleString(
+      "pt-BR"
+    );
+  } else {
+    modalPopulacao.textContent = "Desconhecida";
+  }
+
+  modalPeriodoOrbital.textContent = planeta.orbital_period + " dias";
+  modalPeriodoRotacao.textContent = planeta.rotation_period + " horas";
+
+  if (planeta.surface_water !== "unknown") {
+    modalAguaSuperficial.textContent = planeta.surface_water + "%";
+  } else {
+    modalAguaSuperficial.textContent = "Desconhecida";
+  }
 
   // Preencher terrenos
   const terrenosElement = document.getElementById("modalTerrenos");
   terrenosElement.innerHTML = "";
+
   if (planeta.terrain && planeta.terrain !== "unknown") {
     const terrenos = planeta.terrain.split(", ");
-    terrenos.forEach((terreno) => {
+    for (let i = 0; i < terrenos.length; i++) {
       const li = document.createElement("li");
       li.classList.add("mb-1");
-      li.textContent = terreno;
+      li.textContent = terrenos[i];
       terrenosElement.appendChild(li);
-    });
+    }
   } else {
     terrenosElement.innerHTML =
       '<li class="text-muted">Nenhum terreno registrado</li>';
@@ -280,10 +326,8 @@ async function abrirModalPlaneta(planeta) {
 
   // Buscar dados adicionais em paralelo
   try {
-    const [residentes, filmes] = await Promise.all([
-      buscarDadosDasURLs(planeta.residents),
-      buscarDadosDasURLs(planeta.films),
-    ]);
+    const residentes = await buscarDadosDasURLs(planeta.residents);
+    const filmes = await buscarDadosDasURLs(planeta.films);
 
     // Preencher as listas no modal
     preencherListaModal("modalResidentes", residentes);
@@ -302,10 +346,14 @@ async function abrirModalPlaneta(planeta) {
 
   if (jaFavoritado) {
     buttonFavorites.textContent = "Remover dos Favoritos ❌";
-    buttonFavorites.onclick = () => removerDosFavoritos(planeta.name);
+    buttonFavorites.onclick = function () {
+      removerDosFavoritos(planeta.name);
+    };
   } else {
     buttonFavorites.textContent = "Favoritar ⭐";
-    buttonFavorites.onclick = () => adicionarAosFavoritos(planeta);
+    buttonFavorites.onclick = function () {
+      adicionarAosFavoritos(planeta);
+    };
   }
 
   // Abrir modal
@@ -317,21 +365,39 @@ async function abrirModalPlaneta(planeta) {
 // Função para verificar se planeta já está favoritado
 function verificarSeJaFavoritado(planeta) {
   const favoritos = obterFavoritos();
-  return favoritos.some((f) => f.name === planeta.name);
+
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].name === planeta.name) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // Função para filtrar planetas pelo texto digitado
 function filtrarPorNome(lista, textoUsuario) {
   const textoEmMinusculo = textoUsuario.toLowerCase();
-  return lista.filter((planeta) => {
-    return planeta.name.toLowerCase().includes(textoEmMinusculo);
-  });
+  const planetasFiltrados = [];
+
+  for (let i = 0; i < lista.length; i++) {
+    const planeta = lista[i];
+    if (planeta.name.toLowerCase().includes(textoEmMinusculo)) {
+      planetasFiltrados.push(planeta);
+    }
+  }
+
+  return planetasFiltrados;
 }
 
 // Funções para gerenciar favoritos
 function obterFavoritos() {
   const favoritos = localStorage.getItem("planetasFavoritos");
-  return favoritos ? JSON.parse(favoritos) : [];
+  if (favoritos) {
+    return JSON.parse(favoritos);
+  } else {
+    return [];
+  }
 }
 
 function salvarFavoritos(favoritos) {
@@ -340,15 +406,25 @@ function salvarFavoritos(favoritos) {
 
 function adicionarAosFavoritos(planeta) {
   const favoritos = obterFavoritos();
+  let jaExiste = false;
 
-  if (!favoritos.some((f) => f.name === planeta.name)) {
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].name === planeta.name) {
+      jaExiste = true;
+      break;
+    }
+  }
+
+  if (!jaExiste) {
     favoritos.push(planeta);
     salvarFavoritos(favoritos);
 
     // Atualizar botão no modal
     const buttonFavorites = document.getElementById("btn-favorite");
     buttonFavorites.textContent = "Remover dos Favoritos ❌";
-    buttonFavorites.onclick = () => removerDosFavoritos(planeta.name);
+    buttonFavorites.onclick = function () {
+      removerDosFavoritos(planeta.name);
+    };
 
     atualizarBotaoCard(planeta.name);
 
@@ -359,18 +435,38 @@ function adicionarAosFavoritos(planeta) {
 
 function removerDosFavoritos(nomePlaneta) {
   let favoritos = obterFavoritos();
-  favoritos = favoritos.filter((f) => f.name !== nomePlaneta);
+  const novosFavoritos = [];
+
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].name !== nomePlaneta) {
+      novosFavoritos.push(favoritos[i]);
+    }
+  }
+
+  favoritos = novosFavoritos;
   salvarFavoritos(favoritos);
 
   // Atualizar botão no modal
   const buttonFavorites = document.getElementById("btn-favorite");
   buttonFavorites.textContent = "Favoritar ⭐";
-  buttonFavorites.onclick = () => {
-    const planetaAtual = planetas.find((f) => f.name === nomePlaneta);
-    if (planetaAtual) adicionarAosFavoritos(planetaAtual);
+  buttonFavorites.onclick = function () {
+    const planetaAtual = encontrarPlanetaPorNome(nomePlaneta);
+    if (planetaAtual) {
+      adicionarAosFavoritos(planetaAtual);
+    }
   };
 
   atualizarBotaoCard(nomePlaneta);
+}
+
+// Função auxiliar para encontrar planeta por nome
+function encontrarPlanetaPorNome(nomePlaneta) {
+  for (let i = 0; i < planetas.length; i++) {
+    if (planetas[i].name === nomePlaneta) {
+      return planetas[i];
+    }
+  }
+  return null;
 }
 
 function atualizarListaFavoritos() {
@@ -386,56 +482,63 @@ function atualizarListaFavoritos() {
       </div>
     `;
     return;
-    
   }
 
-  listaFavoritos.innerHTML = favoritos
-    .map((planeta) => {
-      return `
+  let htmlFavoritos = "";
+
+  for (let i = 0; i < favoritos.length; i++) {
+    const planeta = favoritos[i];
+
+    let populacaoTexto = "Desconhecida";
+    if (planeta.population !== "unknown") {
+      populacaoTexto = parseInt(planeta.population).toLocaleString("pt-BR");
+    }
+
+    htmlFavoritos += `
       <div class="favorito-item">
         <div>
           <h5 class="mb-1">${planeta.name}</h5>
           <p class="mb-1"><strong>Clima:</strong> ${planeta.climate}</p>
-          <p class="mb-1"><strong>População:</strong> ${
-            planeta.population !== "unknown"
-              ? parseInt(planeta.population).toLocaleString("pt-BR")
-              : "Desconhecida"
-          }</p>
+          <p class="mb-1"><strong>População:</strong> ${populacaoTexto}</p>
         </div>
         <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-outline-light" onclick="abrirDetalhesPlaneta('${
-            planeta.name
-          }')">
+          <button class="btn btn-sm btn-outline-light" onclick="abrirDetalhesPlaneta('${planeta.name}')">
             Ver Detalhes
           </button>
-          <button class="btn btn-sm btn-remover-favorito" onclick="removerDosFavoritos('${
-            planeta.name
-          }'); atualizarListaFavoritos();">
+          <button class="btn btn-sm btn-remover-favorito" onclick="removerDosFavoritos('${planeta.name}'); atualizarListaFavoritos();">
             Remover
           </button>
         </div>
       </div>
     `;
-    })
-    .join("");
+  }
+
+  listaFavoritos.innerHTML = htmlFavoritos;
 }
 
 // Função para abrir detalhes do planeta a partir dos favoritos
 function abrirDetalhesPlaneta(nomePlaneta) {
   const favoritos = obterFavoritos();
-  const planeta = favoritos.find((f) => f.name === nomePlaneta);
+  let planetaEncontrado = null;
 
-  if (planeta) {
+  for (let i = 0; i < favoritos.length; i++) {
+    if (favoritos[i].name === nomePlaneta) {
+      planetaEncontrado = favoritos[i];
+      break;
+    }
+  }
+
+  if (planetaEncontrado) {
     // Fechar modal de favoritos
-    const favoritosModal = bootstrap.Modal.getInstance(
-      document.getElementById("favoritosModal")
-    );
+    const favoritosModalElement = document.getElementById("favoritosModal");
+    const favoritosModal = bootstrap.Modal.getInstance(favoritosModalElement);
+
     if (favoritosModal) {
       favoritosModal.hide();
     }
 
     // Abrir modal de detalhes
-    abrirModalPlaneta(planeta);
+    abrirModalPlaneta(planetaEncontrado);
   }
 }
 
@@ -469,9 +572,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     const btnFavoritos = document.getElementById("btnFavoritos");
     btnFavoritos.addEventListener("click", function () {
       atualizarListaFavoritos();
-      const favoritosModal = new bootstrap.Modal(
-        document.getElementById("favoritosModal")
-      );
+      const favoritosModalElement = document.getElementById("favoritosModal");
+      const favoritosModal = new bootstrap.Modal(favoritosModalElement);
       favoritosModal.show();
     });
   } catch (error) {
@@ -483,14 +585,21 @@ document.addEventListener("DOMContentLoaded", async function () {
 // Função para atualizar o botão do card quando favoritar pelo modal
 function atualizarBotaoCard(nomePlaneta) {
   const card = document.querySelector(
-    `.planeta-card[data-planeta-id="${nomePlaneta}"]`
+    '.planeta-card[data-planeta-id="' + nomePlaneta + '"]'
   );
 
   if (card) {
     const btnFavoritar = card.querySelector(".btn-favorito");
     const favoritos =
       JSON.parse(localStorage.getItem("planetasFavoritos")) || [];
-    const isFavoritado = favoritos.some((fav) => fav.name === nomePlaneta);
+    let isFavoritado = false;
+
+    for (let i = 0; i < favoritos.length; i++) {
+      if (favoritos[i].name === nomePlaneta) {
+        isFavoritado = true;
+        break;
+      }
+    }
 
     if (isFavoritado) {
       btnFavoritar.innerHTML = '<i class="fas fa-heart"></i>';
@@ -502,25 +611,25 @@ function atualizarBotaoCard(nomePlaneta) {
 
     // Feedback visual
     btnFavoritar.style.transform = "scale(1.3)";
-    setTimeout(() => {
+    setTimeout(function () {
       btnFavoritar.style.transform = "scale(1)";
     }, 300);
   }
 }
 
 async function buscarComCache(endpoint) {
-  const chave = `cache_${endpoint}`;
+  const chave = "cache_" + endpoint;
 
   // 1. Tenta pegar do cache
   const cache = localStorage.getItem(chave);
 
   if (cache) {
-    console.log(`🔵 Usando cache de ${endpoint}`);
+    console.log("🔵 Usando cache de " + endpoint);
     return JSON.parse(cache);
   }
 
   // 2. Se não tiver cache → faz fetch normalmente
-  console.log(`🟡 Buscando ${endpoint} da API...`);
+  console.log("🟡 Buscando " + endpoint + " da API...");
   const dados = await buscarDados(endpoint);
 
   // 3. Salva no cache
