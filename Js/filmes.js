@@ -101,7 +101,7 @@ function adicionaCards(listaFilmes) {
     // Botão de favoritar
     const btnFavoritar = document.createElement("button");
     btnFavoritar.classList.add("btn-favoritar-card");
-    btnFavoritar.innerHTML = "🤍"; // Coração vazio inicialmente
+    btnFavoritar.innerHTML = '<i class="far fa-heart"></i>'; 
 
     // Verificar se o filme já está favoritado
     const favoritos = JSON.parse(localStorage.getItem("filmesFavoritos")) || [];
@@ -154,7 +154,7 @@ function toggleFavorito(filme, btnElement) {
   if (isFavoritado) {
     // Remover dos favoritos
     favoritos = favoritos.filter((fav) => fav.episode_id !== filme.episode_id);
-    btnElement.innerHTML = "🤍";
+    btnElement.innerHTML = '<i class="far fa-heart"></i>';
     btnElement.classList.remove("favoritado");
     console.log(`❌ "${filme.title}" removido dos favoritos`);
   } else {
