@@ -18,35 +18,71 @@ async function buscarDados(endpoint) {
   }
 }
 
-// Função auxiliar para buscar múltiplos dados da API
-async function buscarDadosDasURLs(urls) {
+async function buscarComCache(endpoint) {
+  const chave = "cache_" + endpoint;
+
+  // 1. Tenta pegar do cache
+  const cache = localStorage.getItem(chave);
+
+  if (cache) {
+    return JSON.parse(cache);
+  }
+
+  // 2. Se não tiver cache → faz fetch normalmente
+  const dados = await buscarDados(endpoint);
+
+  // 3. Salva no cache
+  localStorage.setItem(chave, JSON.stringify(dados));
+
+  return dados;
+}
+
+// Função para buscar dados de URLs com cache
+async function buscarDadosDasURLsComCache(urls) {
   if (!urls || urls.length === 0) {
     return [];
   }
 
   try {
-    const promises = urls.map(function (url) {
-      return fetch(url)
-        .then(function (response) {
-          if (!response.ok) throw new Error("Erro na requisição");
-          return response.json();
-        })
-        .then(function (data) {
-          return data.name || data.title;
-        })
-        .catch(function (error) {
-          console.error("Erro ao buscar " + url + ":", error);
-          return "N/A";
-        });
-    });
+    const promessas = [];
 
-    return await Promise.all(promises);
-  } catch (error) {
-    console.error("Erro geral ao buscar dados:", error);
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      const chaveCache = "cache_url_" + url.split("/").filter(Boolean).pop();
+      const cacheSalvo = localStorage.getItem(chaveCache);
+
+      if (cacheSalvo) {
+        const resultadoCache = JSON.parse(cacheSalvo);
+        promessas.push(Promise.resolve(resultadoCache));
+      } else {
+        const promessa = fetch(url)
+          .then(function (resposta) {
+            if (!resposta.ok) {
+              throw new Error("Erro na requisição");
+            }
+            return resposta.json();
+          })
+          .then(function (dados) {
+            const nomeOuTitulo = dados.name || dados.title;
+            localStorage.setItem(chaveCache, JSON.stringify(nomeOuTitulo));
+            return nomeOuTitulo;
+          })
+          .catch(function (erro) {
+            console.error("Erro ao buscar " + url + ":", erro);
+            return "N/A";
+          });
+
+        promessas.push(promessa);
+      }
+    }
+
+    const resultados = await Promise.all(promessas);
+    return resultados;
+  } catch (erro) {
+    console.error("Erro geral ao buscar dados:", erro);
     return [];
   }
 }
-
 let filmsFavorites;
 let filmes = [];
 
@@ -292,13 +328,13 @@ async function abrirModalFilme(filme) {
   // Mostrar loading nas listas
   mostrarLoadingModal();
 
-  // Buscar dados adicionais em paralelo
+  // Buscar dados adicionais em paralelo COM CACHE
   try {
-    const personagens = await buscarDadosDasURLs(filme.characters);
-    const planetas = await buscarDadosDasURLs(filme.planets);
-    const naves = await buscarDadosDasURLs(filme.starships);
-    const veiculos = await buscarDadosDasURLs(filme.vehicles);
-    const especies = await buscarDadosDasURLs(filme.species);
+    const personagens = await buscarDadosDasURLsComCache(filme.characters);
+    const planetas = await buscarDadosDasURLsComCache(filme.planets);
+    const naves = await buscarDadosDasURLsComCache(filme.starships);
+    const veiculos = await buscarDadosDasURLsComCache(filme.vehicles);
+    const especies = await buscarDadosDasURLsComCache(filme.species);
 
     // Preencher as listas no modal
     preencherListaModal("modalPersonagens", personagens);
@@ -594,23 +630,4 @@ function atualizarBotaoCard(episodeId) {
       btnFavoritar.style.transform = "scale(1)";
     }, 300);
   }
-}
-
-async function buscarComCache(endpoint) {
-  const chave = "cache_" + endpoint;
-
-  // 1. Tenta pegar do cache
-  const cache = localStorage.getItem(chave);
-
-  if (cache) {
-    return JSON.parse(cache);
-  }
-
-  // 2. Se não tiver cache → faz fetch normalmente
-  const dados = await buscarDados(endpoint);
-
-  // 3. Salva no cache
-  localStorage.setItem(chave, JSON.stringify(dados));
-
-  return dados;
 }

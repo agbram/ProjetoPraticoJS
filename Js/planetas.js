@@ -18,35 +18,71 @@ async function buscarDados(endpoint) {
   }
 }
 
-// Função auxiliar para buscar múltiplos dados da API
-async function buscarDadosDasURLs(urls) {
+async function buscarComCache(endpoint) {
+  const chave = "cache_" + endpoint;
+
+  // 1. Tenta pegar do cache
+  const cache = localStorage.getItem(chave);
+
+  if (cache) {
+    return JSON.parse(cache);
+  }
+
+  // 2. Se não tiver cache → faz fetch normalmente
+  const dados = await buscarDados(endpoint);
+
+  // 3. Salva no cache
+  localStorage.setItem(chave, JSON.stringify(dados));
+
+  return dados;
+}
+
+// Função para buscar dados de URLs com cache
+async function buscarDadosDasURLsComCache(urls) {
   if (!urls || urls.length === 0) {
     return [];
   }
 
   try {
-    const promises = urls.map(function (url) {
-      return fetch(url)
-        .then(function (response) {
-          if (!response.ok) throw new Error("Erro na requisição");
-          return response.json();
-        })
-        .then(function (data) {
-          return data.name || data.title;
-        })
-        .catch(function (error) {
-          console.error("Erro ao buscar " + url + ":", error);
-          return "N/A";
-        });
-    });
+    const promessas = [];
 
-    return await Promise.all(promises);
-  } catch (error) {
-    console.error("Erro geral ao buscar dados:", error);
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      const chaveCache = "cache_url_" + url.split("/").filter(Boolean).pop();
+      const cache = localStorage.getItem(chaveCache);
+
+      if (cache) {
+        // Se tem cache, usa o valor salvo
+        promessas.push(Promise.resolve(JSON.parse(cache)));
+      } else {
+        // Se não tem cache, faz a requisição
+        const promessa = fetch(url)
+          .then(function (resposta) {
+            if (!resposta.ok) throw new Error("Erro na requisição");
+            return resposta.json();
+          })
+          .then(function (dados) {
+            const resultado = dados.name || dados.title;
+            // Salva no cache para usar depois
+            localStorage.setItem(chaveCache, JSON.stringify(resultado));
+            return resultado;
+          })
+          .catch(function (erro) {
+            console.error("Erro ao buscar " + url + ":", erro);
+            return "N/A";
+          });
+
+        promessas.push(promessa);
+      }
+    }
+
+    const resultados = await Promise.all(promessas);
+    return resultados;
+  } catch (erro) {
+    console.error("Erro geral ao buscar dados:", erro);
     return [];
   }
 }
-
 let planetasFavoritos;
 let planetas = [];
 
@@ -324,10 +360,10 @@ async function abrirModalPlaneta(planeta) {
   // Mostrar loading nas listas
   mostrarLoadingModal();
 
-  // Buscar dados adicionais em paralelo
+  // Buscar dados adicionais em paralelo COM CACHE
   try {
-    const residentes = await buscarDadosDasURLs(planeta.residents);
-    const filmes = await buscarDadosDasURLs(planeta.films);
+    const residentes = await buscarDadosDasURLsComCache(planeta.residents);
+    const filmes = await buscarDadosDasURLsComCache(planeta.films);
 
     // Preencher as listas no modal
     preencherListaModal("modalResidentes", residentes);
@@ -615,25 +651,4 @@ function atualizarBotaoCard(nomePlaneta) {
       btnFavoritar.style.transform = "scale(1)";
     }, 300);
   }
-}
-
-async function buscarComCache(endpoint) {
-  const chave = "cache_" + endpoint;
-
-  // 1. Tenta pegar do cache
-  const cache = localStorage.getItem(chave);
-
-  if (cache) {
-    console.log("🔵 Usando cache de " + endpoint);
-    return JSON.parse(cache);
-  }
-
-  // 2. Se não tiver cache → faz fetch normalmente
-  console.log("🟡 Buscando " + endpoint + " da API...");
-  const dados = await buscarDados(endpoint);
-
-  // 3. Salva no cache
-  localStorage.setItem(chave, JSON.stringify(dados));
-
-  return dados;
 }
