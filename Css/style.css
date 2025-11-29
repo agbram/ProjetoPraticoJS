@@ -253,6 +253,14 @@ main {
   color: var(--primary-color);
 }
 
+.nav-card:hover .nav-title{
+  color: var(--text-light);
+}
+
+.nav-card:hover .nav-description {
+  color: var(--text-light);
+}
+
 .nav-description {
   color: var(--text-muted);
   font-size: 0.9rem;
