@@ -101,7 +101,7 @@ function adicionaCards(listaFilmes) {
     // Botão de favoritar
     const btnFavoritar = document.createElement("button");
     btnFavoritar.classList.add("btn-favoritar-card");
-    btnFavoritar.innerHTML = '<i class="far fa-heart"></i>'; 
+    btnFavoritar.innerHTML = '<i class="far fa-heart"></i>';
 
     // Verificar se o filme já está favoritado
     const favoritos = JSON.parse(localStorage.getItem("filmesFavoritos")) || [];
@@ -373,7 +373,7 @@ function abrirDetalhesFilme(episodeId) {
 document.addEventListener("DOMContentLoaded", async function () {
   try {
     // Carregar filmes
-    filmes = await buscarDados("films");
+    filmes = await buscarComCache("films");
     adicionaCards(filmes);
 
     // Configurar busca
@@ -439,4 +439,25 @@ function atualizarBotaoCard(episodeId) {
       btnFavoritar.style.transform = "scale(1)";
     }, 300);
   }
+}
+
+async function buscarComCache(endpoint) {
+  const chave = `cache_${endpoint}`;
+
+  // 1. Tenta pegar do cache
+  const cache = localStorage.getItem(chave);
+
+  if (cache) {
+    console.log(`🔵 Usando cache de ${endpoint}`);
+    return JSON.parse(cache);
+  }
+
+  // 2. Se não tiver cache → faz fetch normalmente
+  console.log(`🟡 Buscando ${endpoint} da API...`);
+  const dados = await buscarDados(endpoint);
+
+  // 3. Salva no cache
+  localStorage.setItem(chave, JSON.stringify(dados));
+
+  return dados;
 }
