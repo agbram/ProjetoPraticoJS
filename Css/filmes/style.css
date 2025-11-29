@@ -1,227 +1,567 @@
-/* styles.css */
+/* Css/filmes/style.css */
+/* Variáveis CSS para consistência */
+:root {
+  --primary-color: #ffc107;
+  --primary-dark: #ff8f00;
+  --primary-light: #ffd54f;
+  --background-dark: #121212;
+  --card-dark: #1a1a1a;
+  --card-darker: #2d2d2d;
+  --text-light: #ffffff;
+  --text-muted: #aaaaaa;
+  --border-dark: #333333;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: #f44336;
+  --transition: all 0.3s ease;
+  --border-radius: 12px;
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 12px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Reset e estilos base */
+* {
+  box-sizing: border-box;
+}
+
 body {
-  background-color: #121212;
-  color: #eee;
-  font-family: "Poppins", sans-serif;
+  background-color: var(--background-dark);
+  color: var(--text-light);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
 }
 
 main {
   flex: 1;
+  padding: 2rem 0;
 }
 
+/* Container principal dos filmes */
 #listaFilmes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  padding: 20px 0;
+}
+
+/* Header da página */
+.page-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.page-title {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  position: relative;
+  display: inline-block;
+}
+
+.page-title::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--primary-color),
+    transparent
+  );
+  border-radius: 2px;
+}
+
+/* Barra de pesquisa e controles */
+.controls-container {
   display: flex;
-  gap: 5px;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  gap: 20px;
+  flex-wrap: wrap;
 }
-#modalAbertura {
-  color: #121212;
+
+.search-container {
+  flex: 1;
+  min-width: 300px;
+  max-width: 600px;
 }
-.card-body {
-  display: block;
+
+.search-box {
+  display: flex;
+  background: var(--card-dark);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  border: 1px solid var(--border-dark);
+}
+
+.search-box:focus-within {
+  box-shadow: var(--shadow-hover);
+  border-color: var(--primary-color);
+}
+
+#buscaFilme {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  padding: 12px 20px;
+  font-size: 1rem;
+  outline: none;
+}
+
+#buscaFilme::placeholder {
+  color: var(--text-muted);
+}
+
+#btnBuscar {
+  background: var(--primary-color);
+  border: none;
+  color: var(--background-dark);
+  padding: 0 25px;
+  font-weight: 600;
   cursor: pointer;
+  transition: var(--transition);
 }
 
-.btn-outline-light {
-  border-radius: 10px;
+#btnBuscar:hover {
+  background: var(--primary-dark);
 }
 
-.modal-dialog {
-  color: black;
-}
-
-.card-container {
+.controls-actions {
   display: flex;
   gap: 15px;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
-.card-body {
-  display: block;
+#btnFavoritos {
+  background: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+#btnFavoritos:hover {
+  background: var(--primary-color);
+  color: var(--text-light);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+}
+
+/* Cards de filmes */
+.filme-card {
+  background: linear-gradient(145deg, var(--card-dark), var(--card-darker));
+  border: 1px solid var(--border-dark);
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.filme-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--primary-color);
+}
+
+.filme-card-header {
+  background: linear-gradient(135deg, #121212, var(--card-darker));
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-dark);
+  position: relative;
+  min-height: 130px;
+}
+
+.filme-card-title {
+  color: var(--primary-color);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  padding-right: 50px;
+  line-height: 1.3;
+}
+
+.filme-card-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+}
+
+.filme-card-body {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.filme-card-features {
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.filme-feature {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border-dark);
+  align-items: center;
+}
+
+.filme-feature:last-child {
+  border-bottom: none;
+}
+
+.feature-label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.feature-value {
+  color: var(--text-light);
+  font-weight: 500;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.filme-card-footer {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-dark);
+}
+
+/* Botão de favorito nos cards */
+.btn-favorito {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  font-size: 1.2rem;
+  transition: var(--transition);
+  cursor: pointer;
+  z-index: 10;
+}
+
+.btn-favorito:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.btn-favorito.favoritado {
+  color: var(--primary-color);
+  background: rgba(255, 193, 7, 0.2);
+}
+
+.btn-favorito.favoritado:hover {
+  background: rgba(255, 193, 7, 0.3);
+}
+
+/* Botão de detalhes personalizado */
+.btn-filme-detalhes {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--primary-dark)
+  );
+  border: none;
+  color: var(--background-dark);
+  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  transition: var(--transition);
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
 }
 
-.btn-outline-light {
-  border-radius: 10px;
+.btn-filme-detalhes:hover {
+  background: linear-gradient(135deg, #ffd54f, var(--primary-color));
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+  color: var(--background-dark);
 }
-#btn-favorite {
-  box-sizing: content-box;
 
-  color: #000;
-  border: 0;
-  border-radius: 0.375rem;
-}
-#btn-favorite:hover {
-  opacity: 0.75;
-}
-/* Estilização do Modal no Tema Escuro */
+/* Modais */
 .modal-content {
-  background-color: #1e1e1e;
-  color: #eee;
-  border: none;
-  border-radius: 12px;
+  background: linear-gradient(145deg, var(--card-dark), #252525);
+  border: 1px solid #444;
+  border-radius: var(--border-radius);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .modal-header {
-  border-bottom: 1px solid #333;
-  background-color: #121212;
-  border-radius: 12px 12px 0 0;
-  padding: 1.2rem 1.5rem;
-}
-
-.modal-header .btn-close {
-  filter: invert(1) grayscale(100%) brightness(200%);
-}
-
-.modal-title {
-  color: #f8f9fa;
-  font-weight: 600;
-}
-
-.modal-body {
+  background: linear-gradient(135deg, #121212, var(--card-darker));
+  border-bottom: 1px solid #444;
   padding: 1.5rem;
 }
 
+.modal-title {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
 .modal-footer {
-  border-top: 1px solid #333;
-  background-color: #121212;
-  border-radius: 0 0 12px 12px;
+  border-top: 1px solid #444;
+  background: linear-gradient(135deg, #121212, var(--card-darker));
   padding: 1rem 1.5rem;
-  align-items: stretch;
 }
 
-/* Melhorias de espaçamento e organização */
-.info-section {
-  margin-bottom: 1.5rem;
+/* Botão de favoritar no modal */
+#btn-favorite {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--primary-dark)
+  );
+  border: none;
+  color: var(--background-dark);
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  transition: var(--transition);
 }
 
-.info-label {
-  color: #aaa;
+#btn-favorite:hover {
+  background: linear-gradient(135deg, #ffd54f, var(--primary-color));
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+}
+
+/* Específico para o opening crawl */
+#modalAbertura {
+  color: #eee !important;
+  background-color: #252525 !important;
+  border-left: 3px solid #ffc107 !important;
+  padding: 1rem !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-style: italic !important;
+  line-height: 1.6 !important;
+  max-height: 150px !important;
+  overflow-y: auto !important;
+}
+
+/* Animações de entrada para os cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filme-card {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.filme-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.filme-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.filme-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* Estados vazios */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+/* Navegação */
+.navbar-brand {
+  font-weight: 700;
+  color: var(--primary-color) !important;
+  font-size: 1.8rem;
+  transition: var(--transition);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-brand:hover {
+  color: var(--primary-light) !important;
+  transform: scale(1.05);
+}
+
+.nav-link.active {
+  color: var(--primary-color) !important;
+  font-weight: 600;
+  position: relative;
+}
+
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--primary-color);
+}
+
+/* Footer */
+footer {
+  margin-top: auto;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+  .controls-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-container {
+    max-width: 100%;
+  }
+
+  .controls-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  #listaFilmes {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .filme-card-header {
+    padding: 1.2rem;
+    min-height: 120px;
+  }
+
+  .filme-card-body {
+    padding: 1.2rem;
+  }
+
+  .filme-card-title {
+    font-size: 1.2rem;
+    padding-right: 45px;
+  }
+
+  .btn-favorito {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+  }
+
+  .search-box {
+    flex-direction: column;
+  }
+
+  #btnBuscar {
+    padding: 10px;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title {
+    font-size: 1.8rem;
+  }
+
+  .controls-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  #btnFavoritos {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filme-feature {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .feature-value {
+    margin-top: 5px;
+  }
+}
+
+/* Utilitários */
+.text-small {
   font-size: 0.85rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.3rem;
+  color: var(--text-muted);
 }
 
-.info-value {
-  color: #fff;
-  font-size: 1rem;
-  margin-bottom: 0.8rem;
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
 }
 
-.opening-crawl {
-  background-color: #252525;
-  border-left: 3px solid #ffc107;
-  padding: 1rem;
-  border-radius: 0 8px 8px 0;
-  font-style: italic;
-  line-height: 1.6;
-  max-height: 150px;
-  overflow-y: auto;
-}
-
-.lists-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-}
-
-.list-group {
-  background-color: #252525;
-  border-radius: 8px;
-  padding: 0.8rem;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.list-item {
-  padding: 0.4rem 0;
-  border-bottom: 1px solid #333;
-  color: #ddd;
-}
-
-.list-item:last-child {
-  border-bottom: none;
-}
-
-.highlight {
-  color: #ffc107;
-  font-weight: 600;
-}
-
-/* Cards dos filmes */
-.card {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  color: #eee;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-  border-color: #555;
-}
-
-.card-title {
-  color: #ffc107;
-  font-weight: 600;
-}
-
-.card-text {
-  color: #ccc;
-}
-
-/* Form controls */
-.form-control {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
-  color: #eee;
-}
-
-.form-control:focus {
-  background-color: #252525;
-  border-color: #ffc107;
-  color: #eee;
-  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
-}
-
-.form-control::placeholder {
-  color: #888;
-}
-
-/* Botões */
-.btn-outline-warning {
-  border-color: #ffc107;
-  color: #ffc107;
-}
-
-.btn-outline-warning:hover {
-  background-color: #ffc107;
-  border-color: #ffc107;
-  color: #121212;
-}
-
-.btn-outline-secondary {
-  border-color: #6c757d;
-  color: #6c757d;
-}
-
-.btn-outline-secondary:hover {
-  background-color: #6c757d;
-  border-color: #6c757d;
-  color: #fff;
-}
-
-/* Header */
-header {
-  border-bottom: 1px solid #333;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Scrollbar personalizada */
@@ -242,87 +582,6 @@ header {
   background: #555;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .lists-container {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-body {
-    padding: 1rem;
-  }
-
-  .modal-dialog {
-    margin: 1rem;
-  }
-
-  .card-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .card {
-    width: 100% !important;
-    max-width: 300px;
-  }
-}
-
-/* Estados de loading */
-.loading {
-  opacity: 0.7;
-  pointer-events: none;
-}
-
 .text-muted {
-  color: #6c757d !important;
-}
-
-/* Badge para o botão de detalhes no card */
-.badge {
-  font-size: 0.7em;
-}
-
-/* Estilo para o ícone de coração nos cards */
-.btn-favoritar-card {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 18px;
-  transition: all 0.3s ease;
-  z-index: 10;
-  cursor: pointer;
-}
-
-.btn-favoritar-card:hover {
-  background: rgba(0, 0, 0, 0.9);
-  transform: scale(1.1);
-}
-
-.btn-favoritar-card.favoritado {
-  color: #ff4757;
-  background: rgba(255, 71, 87, 0.2);
-}
-
-.btn-favoritar-card.favoritado:hover {
-  background: rgba(255, 71, 87, 0.3);
-}
-
-/* Ajuste para o card ter position relative */
-.card-filme {
-  position: relative;
-}
-
-/* Garantir que o card-body não cubra o botão */
-.card-body {
-  position: relative;
-  z-index: 1;
+  color: var(--text-muted) !important;
 }

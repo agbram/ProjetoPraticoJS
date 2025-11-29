@@ -91,16 +91,25 @@ function adicionaCards(listaFilmes) {
   const container = document.getElementById("listaFilmes");
   container.innerHTML = "";
 
+  if (listaFilmes.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🎬</div>
+        <h3>Nenhum filme encontrado</h3>
+        <p>Tente ajustar sua busca ou filtro</p>
+      </div>
+    `;
+    return;
+  }
+
   listaFilmes.forEach((filme) => {
     const cardDiv = document.createElement("div");
-    cardDiv.classList.add("card", "card-filme");
-    cardDiv.style.width = "18rem";
-    cardDiv.style.cursor = "pointer";
+    cardDiv.classList.add("filme-card");
     cardDiv.setAttribute("data-episode-id", filme.episode_id);
 
     // Botão de favoritar
     const btnFavoritar = document.createElement("button");
-    btnFavoritar.classList.add("btn-favoritar-card");
+    btnFavoritar.classList.add("btn-favorito");
     btnFavoritar.innerHTML = '<i class="far fa-heart"></i>';
 
     // Verificar se o filme já está favoritado
@@ -110,7 +119,7 @@ function adicionaCards(listaFilmes) {
     );
 
     if (isFavoritado) {
-      btnFavoritar.innerHTML = "💛";
+      btnFavoritar.innerHTML = '<i class="fas fa-heart"></i>';
       btnFavoritar.classList.add("favoritado");
     }
 
@@ -120,21 +129,79 @@ function adicionaCards(listaFilmes) {
       toggleFavorito(filme, btnFavoritar);
     });
 
+    const cardHeader = document.createElement("div");
+    cardHeader.classList.add("filme-card-header");
+
+    const cardTitle = document.createElement("h3");
+    cardTitle.classList.add("filme-card-title");
+    cardTitle.textContent = filme.title;
+
+    const cardSubtitle = document.createElement("p");
+    cardSubtitle.classList.add("filme-card-subtitle");
+    cardSubtitle.textContent = `Episódio ${filme.episode_id}`;
+
     const cardBody = document.createElement("div");
-    cardBody.classList.add("card-body");
+    cardBody.classList.add("filme-card-body");
 
-    const titulo = document.createElement("h5");
-    titulo.classList.add("card-title");
-    titulo.textContent = filme.title;
+    const cardFeatures = document.createElement("div");
+    cardFeatures.classList.add("filme-card-features");
 
-    const diretor = document.createElement("p");
-    diretor.classList.add("card-text");
-    diretor.textContent = `Diretor: ${filme.director}`;
+    // Diretor
+    const diretorFeature = document.createElement("div");
+    diretorFeature.classList.add("filme-feature");
+    diretorFeature.innerHTML = `
+      <span class="feature-label">Diretor</span>
+      <span class="feature-value">${filme.director}</span>
+    `;
 
-    cardBody.appendChild(titulo);
-    cardBody.appendChild(diretor);
-    cardDiv.appendChild(btnFavoritar); // Adiciona o botão primeiro
+    // Data de lançamento
+    const dataFeature = document.createElement("div");
+    dataFeature.classList.add("filme-feature");
+    const dataLancamento = filme.release_date;
+    let dataFormatada;
+    if (dataLancamento) {
+      const data = new Date(dataLancamento);
+      if (!isNaN(data.getTime())) {
+        dataFormatada = data.toLocaleDateString("pt-BR");
+      }
+    }
+    dataFeature.innerHTML = `
+      <span class="feature-label">Lançamento</span>
+      <span class="feature-value">${dataFormatada || dataLancamento}</span>
+    `;
+
+    // Produtor
+    const produtorFeature = document.createElement("div");
+    produtorFeature.classList.add("filme-feature");
+    produtorFeature.innerHTML = `
+      <span class="feature-label">Produtor</span>
+      <span class="feature-value">${filme.producer.split(",")[0]}</span>
+    `;
+
+    const cardFooter = document.createElement("div");
+    cardFooter.classList.add("filme-card-footer");
+
+    const btnDetalhes = document.createElement("button");
+    btnDetalhes.classList.add("btn-filme-detalhes");
+    btnDetalhes.textContent = "Ver Detalhes";
+
+    // Montagem do card
+    cardFeatures.appendChild(diretorFeature);
+    cardFeatures.appendChild(dataFeature);
+    cardFeatures.appendChild(produtorFeature);
+
+    cardBody.appendChild(cardFeatures);
+    cardBody.appendChild(cardFooter);
+
+    cardFooter.appendChild(btnDetalhes);
+
+    cardHeader.appendChild(cardTitle);
+    cardHeader.appendChild(cardSubtitle);
+    cardHeader.appendChild(btnFavoritar);
+
+    cardDiv.appendChild(cardHeader);
     cardDiv.appendChild(cardBody);
+
     container.appendChild(cardDiv);
 
     // Evento de abrir modal
@@ -160,7 +227,7 @@ function toggleFavorito(filme, btnElement) {
   } else {
     // Adicionar aos favoritos
     favoritos.push(filme);
-    btnElement.innerHTML = "💛";
+    btnElement.innerHTML = '<i class="fas fa-heart"></i>';
     btnElement.classList.add("favoritado");
     console.log(`✅ "${filme.title}" adicionado aos favoritos`);
   }
@@ -227,10 +294,10 @@ async function abrirModalFilme(filme) {
   const jaFavoritado = verificarSeJaFavoritado(filme);
 
   if (jaFavoritado) {
-    buttonFavorites.textContent = "Remover dos Favoritos❌";
+    buttonFavorites.textContent = "Remover dos Favoritos ❌";
     buttonFavorites.onclick = () => removerDosFavoritos(filme.episode_id);
   } else {
-    buttonFavorites.textContent = "Favoritar⭐";
+    buttonFavorites.textContent = "Favoritar ⭐";
     buttonFavorites.onclick = () => adicionarAosFavoritos(filme);
   }
 
@@ -273,7 +340,7 @@ function adicionarAosFavoritos(filme) {
 
     // Atualizar botão no modal
     const buttonFavorites = document.getElementById("btn-favorite");
-    buttonFavorites.textContent = "Remover dos Favoritos❌";
+    buttonFavorites.textContent = "Remover dos Favoritos ❌";
     buttonFavorites.onclick = () => removerDosFavoritos(filme.episode_id);
 
     atualizarBotaoCard(filme.episode_id);
@@ -290,7 +357,7 @@ function removerDosFavoritos(episodeId) {
 
   // Atualizar botão no modal
   const buttonFavorites = document.getElementById("btn-favorite");
-  buttonFavorites.textContent = "Favoritar⭐";
+  buttonFavorites.textContent = "Favoritar ⭐";
   buttonFavorites.onclick = () => {
     const filmeAtual = filmes.find((f) => f.episode_id === episodeId);
     if (filmeAtual) adicionarAosFavoritos(filmeAtual);
@@ -305,14 +372,15 @@ function atualizarListaFavoritos() {
 
   if (favoritos.length === 0) {
     listaFavoritos.innerHTML = `
-      <div class="empty-favorites">
-        <i>⭐</i>
-        <h4>Nenhum filme favoritado</h4>
+      <div class="empty-state">
+        <div class="empty-state-icon">⭐</div>
+        <h3>Nenhum filme favoritado</h3>
         <p>Adicione filmes aos favoritos clicando no botão "Favoritar" nos detalhes do filme.</p>
       </div>
     `;
     return;
   }
+
   listaFavoritos.innerHTML = favoritos
     .map((filme) => {
       // Formatar data igual no modal
@@ -330,7 +398,9 @@ function atualizarListaFavoritos() {
         <div>
           <h5 class="mb-1">${filme.title}</h5>
           <p class="mb-1"><strong>Diretor:</strong> ${filme.director}</p>
- ${dataFormatada || dataLancamento}</p>
+          <p class="mb-1"><strong>Lançamento:</strong> ${
+            dataFormatada || dataLancamento
+          }</p>
         </div>
         <div class="d-flex gap-2">
           <button class="btn btn-sm btn-outline-light" onclick="abrirDetalhesFilme(${
@@ -380,10 +450,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     const inputBusca = document.getElementById("buscaFilme");
     const botao = document.getElementById("btnBuscar");
 
-    botao.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") botao.click();
-    });
-
     botao.addEventListener("click", function () {
       const valorInput = inputBusca.value;
       const filmeFiltrado = filtrarPorNome(filmes, valorInput);
@@ -400,7 +466,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     // Configurar botão para abrir modal de favoritos
-    const btnFavoritos = document.querySelector(".btn-favoritos-flutuante");
+    const btnFavoritos = document.getElementById("btnFavoritos");
     btnFavoritos.addEventListener("click", function () {
       atualizarListaFavoritos();
       const favoritosModal = new bootstrap.Modal(
@@ -417,19 +483,19 @@ document.addEventListener("DOMContentLoaded", async function () {
 // Função para atualizar o botão do card quando favoritar pelo modal
 function atualizarBotaoCard(episodeId) {
   const card = document.querySelector(
-    `.card-filme[data-episode-id="${episodeId}"]`
+    `.filme-card[data-episode-id="${episodeId}"]`
   );
 
   if (card) {
-    const btnFavoritar = card.querySelector(".btn-favoritar-card");
+    const btnFavoritar = card.querySelector(".btn-favorito");
     const favoritos = JSON.parse(localStorage.getItem("filmesFavoritos")) || [];
     const isFavoritado = favoritos.some((fav) => fav.episode_id === episodeId);
 
     if (isFavoritado) {
-      btnFavoritar.innerHTML = "💛";
+      btnFavoritar.innerHTML = '<i class="fas fa-heart"></i>';
       btnFavoritar.classList.add("favoritado");
     } else {
-      btnFavoritar.innerHTML = "🤍";
+      btnFavoritar.innerHTML = '<i class="far fa-heart"></i>';
       btnFavoritar.classList.remove("favoritado");
     }
 

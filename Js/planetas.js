@@ -382,10 +382,11 @@ function atualizarListaFavoritos() {
       <div class="empty-state">
         <div class="empty-state-icon">⭐</div>
         <h3>Nenhum planeta favoritado</h3>
-        <p>Adicione planetas aos favoritos clicando no botão "Favoritar" nos detalhes do planeta.</p>
+        <p>Adicione planetas aos favoritos para vizualizar.</p>
       </div>
     `;
     return;
+    
   }
 
   listaFavoritos.innerHTML = favoritos

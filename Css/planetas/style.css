@@ -458,10 +458,7 @@ main {
   background: transparent;
   border: 1px solid var(--danger-color);
   color: var(--danger-color);
-  border-radius: 50%;
-  width: 35px;
   height: 35px;
-  display: flex;
   align-items: center;
   justify-content: center;
   transition: var(--transition);
@@ -762,3 +759,9 @@ footer {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
 }
+
+/* Garantir que textos muted tenham opacidade total */
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
