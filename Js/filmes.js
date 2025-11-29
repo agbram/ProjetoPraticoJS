@@ -375,7 +375,7 @@ function atualizarListaFavoritos() {
       <div class="empty-state">
         <div class="empty-state-icon">⭐</div>
         <h3>Nenhum filme favoritado</h3>
-        <p>Adicione filmes aos favoritos clicando no botão "Favoritar" nos detalhes do filme.</p>
+        <p>Adicione filmes aos favoritos para vizualizar.</p>
       </div>
     `;
     return;
