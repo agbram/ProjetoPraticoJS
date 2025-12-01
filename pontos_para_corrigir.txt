@@ -1,4 +1,4 @@
-📋 CHECKLIST DE CORREÇÕES (FAÇAM HOJE!)
+📋 CHECKLIST DE CORREÇÕES 
 Pessoa A (Filmes + Planetas):
 Corrigir cache nos seus arquivos (adicionar timestamp de 12h)
 
