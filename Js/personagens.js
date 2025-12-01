@@ -278,7 +278,7 @@ function exibirModalPersonagem(personagem) {
   
   const planetaId = personagem.homeworld.split('/').filter(Boolean).pop();
   const planetaLink = document.createElement('a');
-  planetaLink.href = `../../Paginas/Planetas/planeta.html?id=${planetaId}`;
+  planetaLink.href = `../../Paginas/Planetas/planetas.html?id=${planetaId}`;
   planetaLink.textContent = 'Ver Planeta Natal';
   planetaLink.classList.add('btn', 'btn-sm', 'btn-outline-primary');
   
