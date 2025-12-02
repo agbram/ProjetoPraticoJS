@@ -5,6 +5,74 @@ import { buscarComCache, buscarDadosDasURLsComCache } from "./apiCache.js";
 let filmsFavorites;
 let filmes = [];
 
+// Gerenciador de instâncias de modais
+let modalInstances = {
+  filmeModal: null,
+  favoritosModal: null
+};
+
+// Função para limpar backdrop
+function limparBackdrop() {
+  // Remover backdrops
+  const backdrops = document.querySelectorAll('.modal-backdrop');
+  backdrops.forEach(backdrop => {
+    if (backdrop.parentNode) {
+      backdrop.parentNode.removeChild(backdrop);
+    }
+  });
+  
+  // Restaurar body
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
+}
+
+// Função para fechar todos os modais
+function fecharTodosModais() {
+  Object.keys(modalInstances).forEach(key => {
+    if (modalInstances[key]) {
+      modalInstances[key].hide();
+    }
+  });
+  
+  // Limpar backdrop após um pequeno delay
+  setTimeout(limparBackdrop, 100);
+}
+
+// Função para abrir modal com segurança
+function abrirModalSeguro(modalId) {
+  // Fechar todos os modais abertos primeiro
+  fecharTodosModais();
+  
+  // Pequeno delay para garantir o fechamento
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const modalElement = document.getElementById(modalId);
+      if (modalElement) {
+        // Se já existe uma instância, usar ela
+        if (!modalInstances[modalId]) {
+          modalInstances[modalId] = new bootstrap.Modal(modalElement, {
+            backdrop: true,
+            keyboard: true,
+            focus: true
+          });
+        }
+        
+        // Configurar evento para limpar quando fechar
+        modalElement.addEventListener('hidden.bs.modal', function() {
+          setTimeout(limparBackdrop, 100);
+        }, { once: true });
+        
+        modalInstances[modalId].show();
+        resolve(modalInstances[modalId]);
+      } else {
+        console.error(`Modal ${modalId} não encontrado!`);
+        resolve(null);
+      }
+    }, 150);
+  });
+}
+
 // Função para mostrar notificação
 function mostrarNotificacao(mensagem, tipo = 'info') {
   const tipos = {
@@ -70,6 +138,7 @@ function preencherListaModal(elementId, itens) {
     elemento.appendChild(li);
   });
 }
+
 // Função para criar e adicionar cards na tela
 function adicionaCards(listaFilmes) {
   const container = document.getElementById("listaFilmes");
@@ -257,7 +326,6 @@ function toggleFavorito(filme, btnElement) {
   }, 300);
 }
 
-// Função para abrir modal do filme
 // Função para abrir modal do filme (VERSÃO CORRIGIDA)
 async function abrirModalFilme(filme) {
   // Preencher informações básicas do modal
@@ -352,15 +420,8 @@ async function abrirModalFilme(filme) {
     }
   }
 
-  // Abrir modal CORRETO - usar o ID correto do modal
-  const modalElement = document.getElementById('filmeModal');
-  if (!modalElement) {
-    console.error('Modal não encontrado! Verifique se o ID está correto.');
-    return;
-  }
-  
-  const modal = new bootstrap.Modal(modalElement);
-  modal.show();
+  // Abrir modal de forma segura
+  await abrirModalSeguro('filmeModal');
 
   // Rolar para o topo da página para ver o modal melhor
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -512,10 +573,10 @@ function atualizarListaFavoritos() {
           <p class="mb-1"><strong>Lançamento:</strong> ${dataFormatada}</p>
         </div>
         <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-outline-light" onclick="abrirDetalhesFilme(${filme.episode_id})">
+          <button class="btn btn-sm btn-outline-light btn-ver-detalhes-favorito" data-episode-id="${filme.episode_id}">
             Ver Detalhes
           </button>
-          <button class="btn btn-sm btn-remover-favorito" onclick="removerDosFavoritos(${filme.episode_id}); atualizarListaFavoritos();">
+          <button class="btn btn-sm btn-remover-favorito" data-episode-id="${filme.episode_id}">
             Remover
           </button>
         </div>
@@ -524,10 +585,32 @@ function atualizarListaFavoritos() {
   }
 
   listaFavoritos.innerHTML = htmlFavoritos;
+  
+  // Adicionar event listeners aos botões dos favoritos
+  setTimeout(() => {
+    // Botões "Ver Detalhes"
+    document.querySelectorAll('.btn-ver-detalhes-favorito').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const episodeId = this.getAttribute('data-episode-id');
+        abrirDetalhesFilme(parseInt(episodeId));
+      });
+    });
+    
+    // Botões "Remover"
+    document.querySelectorAll('.btn-remover-favorito').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const episodeId = this.getAttribute('data-episode-id');
+        removerDosFavoritos(parseInt(episodeId));
+        atualizarListaFavoritos();
+      });
+    });
+  }, 50);
 }
 
 // Função para abrir detalhes do filme a partir dos favoritos
-function abrirDetalhesFilme(episodeId) {
+async function abrirDetalhesFilme(episodeId) {
   const favoritos = obterFavoritos();
   let filmeEncontrado = null;
 
@@ -539,89 +622,18 @@ function abrirDetalhesFilme(episodeId) {
   }
 
   if (filmeEncontrado) {
-    // Fechar modal de favoritos
-    const favoritosModalElement = document.getElementById("favoritosModal");
-    const favoritosModal = bootstrap.Modal.getInstance(favoritosModalElement);
-
-    if (favoritosModal) {
-      favoritosModal.hide();
+    // Fechar modal de favoritos primeiro
+    if (modalInstances.favoritosModal) {
+      modalInstances.favoritosModal.hide();
+      
+      // Pequeno delay para garantir o fechamento
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
 
     // Abrir modal de detalhes
-    abrirModalFilme(filmeEncontrado);
+    await abrirModalFilme(filmeEncontrado);
   }
 }
-
-// Inicialização da aplicação
-document.addEventListener("DOMContentLoaded", async function () {
-  try {
-    // Verificar se há um parâmetro id na URL para abrir o modal automaticamente
-const urlParams = new URLSearchParams(window.location.search);
-const filmeId = urlParams.get('id');
-
-if (filmeId) {
-  // Esperar os filmes carregarem e então abrir o modal correspondente
-  setTimeout(async () => {
-    try {
-      // Buscar os dados específicos do filme pela API
-      const response = await fetch(`https://swapi.dev/api/films/${filmeId}/`);
-      if (response.ok) {
-        const filme = await response.json();
-        
-        // Encontrar o filme na lista carregada
-        const todosFilmes = await buscarDados('films');
-        const filmeEncontrado = todosFilmes.find(f => f.url === filme.url);
-        
-        if (filmeEncontrado) {
-          // Abrir o modal do filme
-          abrirModalFilme(filmeEncontrado);
-          
-          // Remover o parâmetro id da URL sem recarregar a página
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao carregar filme específico:', error);
-    }
-  }, 1000); // Dar tempo para os filmes carregarem
-}
-
-    // Carregar filmes
-    filmes = await buscarComCache("films");
-    adicionaCards(filmes);
-
-    // Configurar busca
-    const inputBusca = document.getElementById("buscaFilme");
-    const botao = document.getElementById("btnBuscar");
-
-    botao.addEventListener("click", function () {
-      const valorInput = inputBusca.value;
-      const filmeFiltrado = filtrarPorNome(filmes, valorInput);
-      adicionaCards(filmeFiltrado);
-    });
-
-    // Permitir busca com Enter
-    inputBusca.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        const valorInput = inputBusca.value;
-        const filmeFiltrado = filtrarPorNome(filmes, valorInput);
-        adicionaCards(filmeFiltrado);
-      }
-    });
-
-    // Configurar botão para abrir modal de favoritos
-    const btnFavoritos = document.getElementById("btnFavoritos");
-    btnFavoritos.addEventListener("click", function () {
-      atualizarListaFavoritos();
-      const favoritosModalElement = document.getElementById("favoritosModal");
-      const favoritosModal = new bootstrap.Modal(favoritosModalElement);
-      favoritosModal.show();
-    });
-  } catch (error) {
-    console.error("Erro ao inicializar aplicação:", error);
-    alert("Erro ao carregar os filmes. Verifique sua conexão.");
-  }
-});
 
 // Função para atualizar o botão do card quando favoritar pelo modal
 function atualizarBotaoCard(episodeId) {
@@ -661,6 +673,10 @@ function atualizarBotaoCard(episodeId) {
 document.addEventListener("DOMContentLoaded", async function () {
   try {
     console.log("Iniciando carregamento de filmes...");
+
+    // Verificar se há um parâmetro id na URL para abrir o modal automaticamente
+    const urlParams = new URLSearchParams(window.location.search);
+    const filmeId = urlParams.get('id');
 
     // Carregar filmes
     filmes = await buscarComCache("films");
@@ -707,17 +723,66 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Configurar botão para abrir modal de favoritos
     const btnFavoritos = document.getElementById("btnFavoritos");
-    btnFavoritos.addEventListener("click", function () {
+    btnFavoritos.addEventListener("click", async function () {
       atualizarListaFavoritos();
-      const favoritosModalElement = document.getElementById("favoritosModal");
-      const favoritosModal = new bootstrap.Modal(favoritosModalElement);
-      favoritosModal.show();
+      await abrirModalSeguro('favoritosModal');
     });
+
+    // Configurar evento para quando o modal de filme for fechado
+    const filmeModalElement = document.getElementById("filmeModal");
+    if (filmeModalElement) {
+      filmeModalElement.addEventListener('hidden.bs.modal', function() {
+        setTimeout(limparBackdrop, 100);
+      });
+    }
+
+    // Configurar evento para quando o modal de favoritos for fechado
+    const favoritosModalElement = document.getElementById("favoritosModal");
+    if (favoritosModalElement) {
+      favoritosModalElement.addEventListener('hidden.bs.modal', function() {
+        setTimeout(limparBackdrop, 100);
+      });
+    }
+
+    // Verificar se precisa abrir um filme específico a partir da URL
+    if (filmeId) {
+      // Esperar os filmes carregarem e então abrir o modal correspondente
+      setTimeout(async () => {
+        try {
+          // Buscar os dados específicos do filme pela API
+          const response = await fetch(`https://swapi.dev/api/films/${filmeId}/`);
+          if (response.ok) {
+            const filme = await response.json();
+            
+            // Encontrar o filme na lista carregada
+            const todosFilmes = await buscarComCache('films');
+            let filmesArray = todosFilmes;
+            
+            // Verificar se precisa extrair results
+            if (todosFilmes && !Array.isArray(todosFilmes) && todosFilmes.results) {
+              filmesArray = todosFilmes.results;
+            }
+            
+            const filmeEncontrado = filmesArray.find(f => f.episode_id === filme.episode_id);
+            
+            if (filmeEncontrado) {
+              // Abrir o modal do filme
+              await abrirModalFilme(filmeEncontrado);
+              
+              // Remover o parâmetro id da URL sem recarregar a página
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao carregar filme específico:', error);
+        }
+      }, 1000); // Dar tempo para os filmes carregarem
+    }
 
     console.log("Aplicação inicializada com sucesso!");
   } catch (error) {
     console.error("Erro ao inicializar aplicação:", error);
-    alert("Erro ao carregar os filmes. Verifique sua conexão.");
+    mostrarNotificacao("Erro ao carregar os filmes. Verifique sua conexão.", 'danger');
 
     // Mostrar mensagem de erro na interface
     const container = document.getElementById("listaFilmes");
