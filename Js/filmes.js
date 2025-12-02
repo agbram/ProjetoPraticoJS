@@ -86,6 +86,34 @@ async function buscarDadosDasURLsComCache(urls) {
 let filmsFavorites;
 let filmes = [];
 
+// Função para mostrar notificação
+function mostrarNotificacao(mensagem, tipo = 'info') {
+  const tipos = {
+    'success': 'alert-success',
+    'info': 'alert-info',
+    'warning': 'alert-warning',
+    'danger': 'alert-danger'
+  };
+  
+  // Criar elemento de notificação
+  const notificacao = document.createElement('div');
+  notificacao.className = `alert ${tipos[tipo]} alert-dismissible fade show position-fixed`;
+  notificacao.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+  notificacao.innerHTML = `
+    ${mensagem}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  document.body.appendChild(notificacao);
+  
+  // Remover após 3 segundos
+  setTimeout(() => {
+    if (notificacao.parentNode) {
+      notificacao.remove();
+    }
+  }, 3000);
+}
+
 // Função para mostrar estado de loading no modal
 function mostrarLoadingModal() {
   const elementosLoading = [
@@ -299,6 +327,7 @@ function toggleFavorito(filme, btnElement) {
 }
 
 // Função para abrir modal do filme
+// Função para abrir modal do filme (VERSÃO CORRIGIDA)
 async function abrirModalFilme(filme) {
   // Preencher informações básicas do modal
   const modalTitulo = document.getElementById("modalTitulo");
@@ -306,6 +335,11 @@ async function abrirModalFilme(filme) {
   const modalProdutor = document.getElementById("modalProdutor");
   const modalAbertura = document.getElementById("modalAbertura");
   const modalDataLancamento = document.getElementById("modalDataLancamento");
+
+  if (!modalTitulo || !modalDiretor || !modalProdutor || !modalAbertura || !modalDataLancamento) {
+    console.error("Elementos do modal não encontrados!");
+    return;
+  }
 
   modalTitulo.textContent = filme.title;
   modalDiretor.textContent = filme.director;
@@ -330,11 +364,13 @@ async function abrirModalFilme(filme) {
 
   // Buscar dados adicionais em paralelo COM CACHE
   try {
-    const personagens = await buscarDadosDasURLsComCache(filme.characters);
-    const planetas = await buscarDadosDasURLsComCache(filme.planets);
-    const naves = await buscarDadosDasURLsComCache(filme.starships);
-    const veiculos = await buscarDadosDasURLsComCache(filme.vehicles);
-    const especies = await buscarDadosDasURLsComCache(filme.species);
+    const [personagens, planetas, naves, veiculos, especies] = await Promise.all([
+      buscarDadosDasURLsComCache(filme.characters),
+      buscarDadosDasURLsComCache(filme.planets),
+      buscarDadosDasURLsComCache(filme.starships),
+      buscarDadosDasURLsComCache(filme.vehicles),
+      buscarDadosDasURLsComCache(filme.species)
+    ]);
 
     // Preencher as listas no modal
     preencherListaModal("modalPersonagens", personagens);
@@ -352,24 +388,51 @@ async function abrirModalFilme(filme) {
 
   // Configurar botão de favoritar
   const buttonFavorites = document.getElementById("btn-favorite");
-  const jaFavoritado = verificarSeJaFavoritado(filme);
-
-  if (jaFavoritado) {
-    buttonFavorites.textContent = "Remover dos Favoritos ❌";
-    buttonFavorites.onclick = function () {
-      removerDosFavoritos(filme.episode_id);
-    };
+  if (!buttonFavorites) {
+    console.error("Botão de favoritar não encontrado!");
   } else {
-    buttonFavorites.textContent = "Favoritar ⭐";
-    buttonFavorites.onclick = function () {
-      adicionarAosFavoritos(filme);
-    };
+    const jaFavoritado = verificarSeJaFavoritado(filme);
+
+    if (jaFavoritado) {
+      buttonFavorites.innerHTML = 'Remover dos Favoritos ❌';
+      buttonFavorites.onclick = function () {
+        removerDosFavoritos(filme.episode_id);
+        // Atualizar o botão após remover
+        buttonFavorites.innerHTML = 'Favoritar ⭐';
+        buttonFavorites.onclick = function () {
+          adicionarAosFavoritos(filme);
+        };
+        // Atualizar o botão no card
+        atualizarBotaoCard(filme.episode_id);
+      };
+    } else {
+      buttonFavorites.innerHTML = 'Favoritar ⭐';
+      buttonFavorites.onclick = function () {
+        if (adicionarAosFavoritos(filme)) {
+          // Atualizar o botão após adicionar
+          buttonFavorites.innerHTML = 'Remover dos Favoritos ❌';
+          buttonFavorites.onclick = function () {
+            removerDosFavoritos(filme.episode_id);
+          };
+          // Atualizar o botão no card
+          atualizarBotaoCard(filme.episode_id);
+        }
+      };
+    }
   }
 
-  // Abrir modal
-  const modalElement = document.getElementById("filmeModal");
+  // Abrir modal CORRETO - usar o ID correto do modal
+  const modalElement = document.getElementById('filmeModal');
+  if (!modalElement) {
+    console.error('Modal não encontrado! Verifique se o ID está correto.');
+    return;
+  }
+  
   const modal = new bootstrap.Modal(modalElement);
   modal.show();
+
+  // Rolar para o topo da página para ver o modal melhor
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Função para verificar se filme já está favoritado
@@ -561,6 +624,37 @@ function abrirDetalhesFilme(episodeId) {
 // Inicialização da aplicação
 document.addEventListener("DOMContentLoaded", async function () {
   try {
+    // Verificar se há um parâmetro id na URL para abrir o modal automaticamente
+const urlParams = new URLSearchParams(window.location.search);
+const filmeId = urlParams.get('id');
+
+if (filmeId) {
+  // Esperar os filmes carregarem e então abrir o modal correspondente
+  setTimeout(async () => {
+    try {
+      // Buscar os dados específicos do filme pela API
+      const response = await fetch(`https://swapi.dev/api/films/${filmeId}/`);
+      if (response.ok) {
+        const filme = await response.json();
+        
+        // Encontrar o filme na lista carregada
+        const todosFilmes = await buscarDados('films');
+        const filmeEncontrado = todosFilmes.find(f => f.url === filme.url);
+        
+        if (filmeEncontrado) {
+          // Abrir o modal do filme
+          abrirModalFilme(filmeEncontrado);
+          
+          // Remover o parâmetro id da URL sem recarregar a página
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar filme específico:', error);
+    }
+  }, 1000); // Dar tempo para os filmes carregarem
+}
+
     // Carregar filmes
     filmes = await buscarComCache("films");
     adicionaCards(filmes);

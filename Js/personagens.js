@@ -20,6 +20,12 @@ async function buscarDados(endpoint) {
   }
 }
 
+async function pegarNomePlaneta(id) {
+  const response = await fetch(`https://swapi.dev/api/planets/${id}/`);
+  const data = await response.json();
+  return data.name;
+}
+
 // Pega do localStorage
 let favoritos = JSON.parse(localStorage.getItem("favoritosPersonagens")) || [];
 
@@ -196,6 +202,36 @@ document.addEventListener('DOMContentLoaded', function() {
       exibirModalFavoritos(favoritos);
     });
   }
+  // Verificar se há um parâmetro id na URL para abrir o modal automaticamente
+const urlParams = new URLSearchParams(window.location.search);
+const personagemId = urlParams.get('id');
+
+if (personagemId) {
+  // Esperar os personagens carregarem e então abrir o modal correspondente
+  setTimeout(async () => {
+    try {
+      // Buscar os dados específicos do personagem pela API
+      const response = await fetch(`https://swapi.dev/api/people/${personagemId}/`);
+      if (response.ok) {
+        const personagem = await response.json();
+        
+        // Encontrar o personagem na lista carregada
+        const todosPersonagens = await buscarDados('people');
+        const personagemEncontrado = todosPersonagens.find(p => p.url === personagem.url);
+        
+        if (personagemEncontrado) {
+          // Abrir o modal do personagem
+          exibirModalPersonagem(personagemEncontrado);
+          
+          // Remover o parâmetro id da URL sem recarregar a página
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar personagem específico:', error);
+    }
+  }, 1000); // Dar tempo para os personagens carregarem
+}
   
   // Limpa a instância do modal quando ele é fechado
   const modalElement = document.getElementById('modalFavoritos');
@@ -264,35 +300,43 @@ function exibirModalPersonagem(personagem) {
   // Adiciona o grupo ao grid
   detailsGrid.appendChild(basicInfoGroup);
   
-  // Adiciona o link para o planeta natal
-  const planetaGroup = document.createElement('div');
-  planetaGroup.classList.add('personagem-detail-group');
-  
-  const planetaTitle = document.createElement('div');
-  planetaTitle.classList.add('detail-group-title');
-  planetaTitle.textContent = 'Planeta Natal';
-  planetaGroup.appendChild(planetaTitle);
-  
-  const planetaItem = document.createElement('div');
-  planetaItem.classList.add('personagem-detail-item');
-  
-  const planetaId = personagem.homeworld.split('/').filter(Boolean).pop();
-  const planetaLink = document.createElement('a');
-  planetaLink.href = `../../Paginas/Planetas/planetas.html?id=${planetaId}`;
-  planetaLink.textContent = 'Ver Planeta Natal';
-  planetaLink.classList.add('btn', 'btn-sm', 'btn-outline-primary');
-  
-  planetaItem.appendChild(planetaLink);
-  planetaGroup.appendChild(planetaItem);
-  
-  detailsGrid.appendChild(planetaGroup);
+// Adiciona o link para o planeta natal
+const planetaGroup = document.createElement('div');
+planetaGroup.classList.add('personagem-detail-group');
+
+const planetaTitle = document.createElement('div');
+planetaTitle.classList.add('detail-group-title');
+planetaTitle.textContent = 'Planeta Natal';
+planetaGroup.appendChild(planetaTitle);
+
+const planetaItem = document.createElement('div');
+planetaItem.classList.add('personagem-detail-item');
+
+const planetaId = personagem.homeworld.split('/').filter(Boolean).pop();
+const planetaLink = document.createElement('a');
+planetaLink.href = `../../Paginas/Planetas/planetas.html?id=${planetaId}`;
+planetaLink.classList.add('btn', 'btn-sm', 'btn-outline-primary');
+
+// Buscar nome do planeta e aplicar no texto do link
+pegarNomePlaneta(planetaId).then(nome => {
+    planetaLink.textContent = nome;
+});
+
+planetaItem.appendChild(planetaLink);
+planetaGroup.appendChild(planetaItem);
+
+detailsGrid.appendChild(planetaGroup);
+
   
   // Monta o modal
   modalBody.appendChild(detailsGrid);
   
   // Exibe o modal
-  const modal = new bootstrap.Modal(document.getElementById('modalPersonagem'));
-  modal.show();
+const modal = new bootstrap.Modal(document.getElementById('modalPersonagem'));
+modal.show();
+
+// Rolar para o topo da página para ver o modal melhor
+window.scrollTo(0, 0);
 }
 
 // Função para criar e adicionar cards na tela
