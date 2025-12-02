@@ -211,7 +211,7 @@ if (personagemId) {
   }, 1000); // Dar tempo para os personagens carregarem
 }
   
-  }
+  });
 
   // Limpa a instância do modal quando ele é fechado
   const modalElement = document.getElementById("modalFavoritos");
@@ -227,7 +227,6 @@ if (personagemId) {
       }
     });
   }
-});
 
 // Função para preencher e exibir o modal
 function exibirModalPersonagem(personagem) {
