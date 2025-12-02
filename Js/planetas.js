@@ -1,88 +1,6 @@
-// Função assíncrona para buscar dados da SWAPI
-async function buscarDados(endpoint) {
-  const url = "https://swapi.dev/api/" + endpoint;
+// Js/planetas.js
+import { buscarComCache, buscarDadosDasURLsComCache } from "./apiCache.js";
 
-  try {
-    const resposta = await fetch(url);
-
-    if (!resposta.ok) {
-      throw new Error("Erro na requisição: " + resposta.status);
-    }
-
-    const dados = await resposta.json();
-    return dados.results;
-  } catch (erro) {
-    console.error("Erro ao buscar dados:", erro);
-    alert("Não foi possível carregar os dados. Verifique sua conexão.");
-    return [];
-  }
-}
-
-async function buscarComCache(endpoint) {
-  const chave = "cache_" + endpoint;
-
-  // 1. Tenta pegar do cache
-  const cache = localStorage.getItem(chave);
-
-  if (cache) {
-    return JSON.parse(cache);
-  }
-
-  // 2. Se não tiver cache → faz fetch normalmente
-  const dados = await buscarDados(endpoint);
-
-  // 3. Salva no cache
-  localStorage.setItem(chave, JSON.stringify(dados));
-
-  return dados;
-}
-
-// Função para buscar dados de URLs com cache
-async function buscarDadosDasURLsComCache(urls) {
-  if (!urls || urls.length === 0) {
-    return [];
-  }
-
-  try {
-    const promessas = [];
-
-    for (let i = 0; i < urls.length; i++) {
-      const url = urls[i];
-      const chaveCache = "cache_url_" + url.split("/").filter(Boolean).pop();
-      const cache = localStorage.getItem(chaveCache);
-
-      if (cache) {
-        // Se tem cache, usa o valor salvo
-        promessas.push(Promise.resolve(JSON.parse(cache)));
-      } else {
-        // Se não tem cache, faz a requisição
-        const promessa = fetch(url)
-          .then(function (resposta) {
-            if (!resposta.ok) throw new Error("Erro na requisição");
-            return resposta.json();
-          })
-          .then(function (dados) {
-            const resultado = dados.name || dados.title;
-            // Salva no cache para usar depois
-            localStorage.setItem(chaveCache, JSON.stringify(resultado));
-            return resultado;
-          })
-          .catch(function (erro) {
-            console.error("Erro ao buscar " + url + ":", erro);
-            return "N/A";
-          });
-
-        promessas.push(promessa);
-      }
-    }
-
-    const resultados = await Promise.all(promessas);
-    return resultados;
-  } catch (erro) {
-    console.error("Erro geral ao buscar dados:", erro);
-    return [];
-  }
-}
 let planetasFavoritos;
 let planetas = [];
 
@@ -652,3 +570,7 @@ function atualizarBotaoCard(nomePlaneta) {
     }, 300);
   }
 }
+
+// Exportar funções para uso global (para o HTML)
+window.abrirDetalhesPlaneta = abrirDetalhesPlaneta;
+window.removerDosFavoritos = removerDosFavoritos;
