@@ -510,8 +510,6 @@ async function exibirModalEspaconave(espaconave) {
   const modal = new bootstrap.Modal(document.getElementById('modalVeiculo'));
   modal.show();
   
-  // Rolar para o topo para ver melhor o modal
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Evento para abrir modal de favoritos
