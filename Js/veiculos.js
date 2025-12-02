@@ -457,7 +457,7 @@ function adicionaCards(listaVeiculos) {
 
     const btnVerDetalhes = document.createElement("button");
     btnVerDetalhes.classList.add("btn-veiculo-detalhes");
-    btnVerDetalhes.textContent = "Ver Detalhes Completos";
+    btnVerDetalhes.textContent = "Ver Detalhes";
     btnVerDetalhes.addEventListener("click", () => {
       exibirModalVeiculo(veiculo);
     });

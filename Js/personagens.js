@@ -402,7 +402,7 @@ function adicionaCards(listaPersonagens) {
 
     const btnVerDetalhes = document.createElement("button");
     btnVerDetalhes.classList.add("btn-personagem-detalhes");
-    btnVerDetalhes.textContent = "Ver Detalhes Completos";
+    btnVerDetalhes.textContent = "Ver Detalhes";
     btnVerDetalhes.addEventListener("click", () => {
       exibirModalPersonagem(personagem);
     });
