@@ -1,88 +1,7 @@
-// Função assíncrona para buscar dados da SWAPI
-async function buscarDados(endpoint) {
-  const url = "https://swapi.dev/api/" + endpoint;
+// Js/filmes.js
+import { buscarComCache, buscarDadosDasURLsComCache } from "./apiCache.js";
 
-  try {
-    const resposta = await fetch(url);
-
-    if (!resposta.ok) {
-      throw new Error("Erro na requisição: " + resposta.status);
-    }
-
-    const dados = await resposta.json();
-    return dados.results;
-  } catch (erro) {
-    console.error("Erro ao buscar dados:", erro);
-    alert("Não foi possível carregar os dados. Verifique sua conexão.");
-    return [];
-  }
-}
-
-async function buscarComCache(endpoint) {
-  const chave = "cache_" + endpoint;
-
-  // 1. Tenta pegar do cache
-  const cache = localStorage.getItem(chave);
-
-  if (cache) {
-    return JSON.parse(cache);
-  }
-
-  // 2. Se não tiver cache → faz fetch normalmente
-  const dados = await buscarDados(endpoint);
-
-  // 3. Salva no cache
-  localStorage.setItem(chave, JSON.stringify(dados));
-
-  return dados;
-}
-
-// Função para buscar dados de URLs com cache
-async function buscarDadosDasURLsComCache(urls) {
-  if (!urls || urls.length === 0) {
-    return [];
-  }
-
-  try {
-    const promessas = [];
-
-    for (let i = 0; i < urls.length; i++) {
-      const url = urls[i];
-      const chaveCache = "cache_url_" + url.split("/").filter(Boolean).pop();
-      const cacheSalvo = localStorage.getItem(chaveCache);
-
-      if (cacheSalvo) {
-        const resultadoCache = JSON.parse(cacheSalvo);
-        promessas.push(Promise.resolve(resultadoCache));
-      } else {
-        const promessa = fetch(url)
-          .then(function (resposta) {
-            if (!resposta.ok) {
-              throw new Error("Erro na requisição");
-            }
-            return resposta.json();
-          })
-          .then(function (dados) {
-            const nomeOuTitulo = dados.name || dados.title;
-            localStorage.setItem(chaveCache, JSON.stringify(nomeOuTitulo));
-            return nomeOuTitulo;
-          })
-          .catch(function (erro) {
-            console.error("Erro ao buscar " + url + ":", erro);
-            return "N/A";
-          });
-
-        promessas.push(promessa);
-      }
-    }
-
-    const resultados = await Promise.all(promessas);
-    return resultados;
-  } catch (erro) {
-    console.error("Erro geral ao buscar dados:", erro);
-    return [];
-  }
-}
+// Variáveis globais
 let filmsFavorites;
 let filmes = [];
 
@@ -151,11 +70,23 @@ function preencherListaModal(elementId, itens) {
     elemento.appendChild(li);
   });
 }
-
 // Função para criar e adicionar cards na tela
 function adicionaCards(listaFilmes) {
   const container = document.getElementById("listaFilmes");
   container.innerHTML = "";
+
+  // VERIFICAÇÃO CRÍTICA: Garantir que listaFilmes é um array
+  if (!listaFilmes || !Array.isArray(listaFilmes)) {
+    console.error("listaFilmes não é um array:", listaFilmes);
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">⚠️</div>
+        <h3>Erro ao carregar filmes</h3>
+        <p>Dados recebidos em formato inválido</p>
+      </div>
+    `;
+    return;
+  }
 
   if (listaFilmes.length === 0) {
     container.innerHTML = `
@@ -725,3 +656,82 @@ function atualizarBotaoCard(episodeId) {
     }, 300);
   }
 }
+
+// Inicialização da aplicação
+document.addEventListener("DOMContentLoaded", async function () {
+  try {
+    console.log("Iniciando carregamento de filmes...");
+
+    // Carregar filmes
+    filmes = await buscarComCache("films");
+    console.log("Dados recebidos:", filmes);
+
+    // VERIFICAÇÃO: Garantir que filmes seja um array
+    if (filmes && !Array.isArray(filmes)) {
+      console.warn("filmes não é um array, tentando extrair results...");
+
+      // Se for o objeto completo da API, extrai o results
+      if (filmes.results && Array.isArray(filmes.results)) {
+        filmes = filmes.results;
+        console.log("Extraído results:", filmes);
+      } else {
+        console.error("Formato inesperado:", filmes);
+        filmes = [];
+      }
+    }
+
+    if (!filmes || filmes.length === 0) {
+      console.warn("Nenhum filme encontrado ou array vazio");
+    }
+
+    adicionaCards(filmes);
+
+    // Configurar busca
+    const inputBusca = document.getElementById("buscaFilme");
+    const botao = document.getElementById("btnBuscar");
+
+    botao.addEventListener("click", function () {
+      const valorInput = inputBusca.value;
+      const filmeFiltrado = filtrarPorNome(filmes, valorInput);
+      adicionaCards(filmeFiltrado);
+    });
+
+    // Permitir busca com Enter
+    inputBusca.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        const valorInput = inputBusca.value;
+        const filmeFiltrado = filtrarPorNome(filmes, valorInput);
+        adicionaCards(filmeFiltrado);
+      }
+    });
+
+    // Configurar botão para abrir modal de favoritos
+    const btnFavoritos = document.getElementById("btnFavoritos");
+    btnFavoritos.addEventListener("click", function () {
+      atualizarListaFavoritos();
+      const favoritosModalElement = document.getElementById("favoritosModal");
+      const favoritosModal = new bootstrap.Modal(favoritosModalElement);
+      favoritosModal.show();
+    });
+
+    console.log("Aplicação inicializada com sucesso!");
+  } catch (error) {
+    console.error("Erro ao inicializar aplicação:", error);
+    alert("Erro ao carregar os filmes. Verifique sua conexão.");
+
+    // Mostrar mensagem de erro na interface
+    const container = document.getElementById("listaFilmes");
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">❌</div>
+        <h3>Erro ao carregar filmes</h3>
+        <p>${error.message || "Verifique sua conexão com a internet"}</p>
+        <button class="btn btn-primary mt-3" onclick="location.reload()">Tentar Novamente</button>
+      </div>
+    `;
+  }
+});
+
+// Exportar funções para uso global (para o HTML)
+window.abrirDetalhesFilme = abrirDetalhesFilme;
+window.removerDosFavoritos = removerDosFavoritos;
