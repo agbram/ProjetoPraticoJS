@@ -308,13 +308,11 @@ function toggleFavorito(filme, btnElement) {
     favoritos = novosFavoritos;
     btnElement.innerHTML = '<i class="far fa-heart"></i>';
     btnElement.classList.remove("favoritado");
-    console.log('❌ "' + filme.title + '" removido dos favoritos');
   } else {
     // Adicionar aos favoritos
     favoritos.push(filme);
     btnElement.innerHTML = '<i class="fas fa-heart"></i>';
     btnElement.classList.add("favoritado");
-    console.log('✅ "' + filme.title + '" adicionado aos favoritos');
   }
 
   localStorage.setItem("filmesFavoritos", JSON.stringify(favoritos));
@@ -672,16 +670,12 @@ function atualizarBotaoCard(episodeId) {
 // Inicialização da aplicação
 document.addEventListener("DOMContentLoaded", async function () {
   try {
-    console.log("Iniciando carregamento de filmes...");
-
     // Verificar se há um parâmetro id na URL para abrir o modal automaticamente
     const urlParams = new URLSearchParams(window.location.search);
     const filmeId = urlParams.get('id');
 
     // Carregar filmes
     filmes = await buscarComCache("films");
-    console.log("Dados recebidos:", filmes);
-
     // VERIFICAÇÃO: Garantir que filmes seja um array
     if (filmes && !Array.isArray(filmes)) {
       console.warn("filmes não é um array, tentando extrair results...");
@@ -689,7 +683,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       // Se for o objeto completo da API, extrai o results
       if (filmes.results && Array.isArray(filmes.results)) {
         filmes = filmes.results;
-        console.log("Extraído results:", filmes);
       } else {
         console.error("Formato inesperado:", filmes);
         filmes = [];
@@ -779,7 +772,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       }, 1000); // Dar tempo para os filmes carregarem
     }
 
-    console.log("Aplicação inicializada com sucesso!");
   } catch (error) {
     console.error("Erro ao inicializar aplicação:", error);
     mostrarNotificacao("Erro ao carregar os filmes. Verifique sua conexão.", 'danger');

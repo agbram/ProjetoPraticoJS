@@ -200,13 +200,11 @@ function toggleFavorito(planeta, btnElement) {
     favoritos = novosFavoritos;
     btnElement.innerHTML = '<i class="far fa-heart"></i>';
     btnElement.classList.remove("favoritado");
-    console.log('❌ "' + planeta.name + '" removido dos favoritos');
   } else {
     // Adicionar aos favoritos
     favoritos.push(planeta);
     btnElement.innerHTML = '<i class="fas fa-heart"></i>';
     btnElement.classList.add("favoritado");
-    console.log('✅ "' + planeta.name + '" adicionado aos favoritos');
   }
 
   localStorage.setItem("planetasFavoritos", JSON.stringify(favoritos));

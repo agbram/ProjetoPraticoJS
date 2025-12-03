@@ -217,13 +217,11 @@ function toggleFavorito(especie, btnElement) {
     favoritos = novosFavoritos;
     btnElement.innerHTML = '<i class="far fa-heart"></i>';
     btnElement.classList.remove("favoritado");
-    console.log('❌ "' + especie.name + '" removido dos favoritos');
   } else {
     // Adicionar aos favoritos
     favoritos.push(especie);
     btnElement.innerHTML = '<i class="fas fa-heart"></i>';
     btnElement.classList.add("favoritado");
-    console.log('✅ "' + especie.name + '" adicionado aos favoritos');
   }
 
   localStorage.setItem("especiesFavoritos", JSON.stringify(favoritos));
