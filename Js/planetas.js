@@ -409,6 +409,9 @@ function removerDosFavoritos(nomePlaneta) {
   };
 
   atualizarBotaoCard(nomePlaneta);
+
+  // Atualizar a lista de favoritos no modal (se estiver aberto)
+  atualizarListaFavoritos();
 }
 
 // Função auxiliar para encontrar planeta por nome
@@ -454,10 +457,10 @@ function atualizarListaFavoritos() {
           <p class="mb-1"><strong>População:</strong> ${populacaoTexto}</p>
         </div>
         <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-outline-light" onclick="abrirDetalhesPlaneta('${planeta.name}')">
+          <button class="btn btn-sm btn-outline-light btn-ver-detalhes" data-nome="${planeta.name}">
             Ver Detalhes
           </button>
-          <button class="btn btn-sm btn-remover-favorito" onclick="removerDosFavoritos('${planeta.name}'); atualizarListaFavoritos();">
+          <button class="btn btn-sm btn-remover-favorito" data-nome="${planeta.name}">
             Remover
           </button>
         </div>
@@ -466,6 +469,27 @@ function atualizarListaFavoritos() {
   }
 
   listaFavoritos.innerHTML = htmlFavoritos;
+
+  // Adicionar event listeners aos botões
+  setTimeout(() => {
+    // Botões "Ver Detalhes"
+    document.querySelectorAll(".btn-ver-detalhes").forEach((button) => {
+      button.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const nomePlaneta = this.getAttribute("data-nome");
+        abrirDetalhesPlaneta(nomePlaneta);
+      });
+    });
+
+    // Botões "Remover"
+    document.querySelectorAll(".btn-remover-favorito").forEach((button) => {
+      button.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const nomePlaneta = this.getAttribute("data-nome");
+        removerDosFavoritos(nomePlaneta);
+      });
+    });
+  }, 50);
 }
 
 // Função para abrir detalhes do planeta a partir dos favoritos
@@ -572,3 +596,4 @@ function atualizarBotaoCard(nomePlaneta) {
 // Exportar funções para uso global (para o HTML)
 window.abrirDetalhesPlaneta = abrirDetalhesPlaneta;
 window.removerDosFavoritos = removerDosFavoritos;
+window.atualizarListaFavoritos = atualizarListaFavoritos;

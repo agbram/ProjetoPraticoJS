@@ -1,15 +1,27 @@
 // Js/personagens.js - JavaScript específico para a página de personagens
-import { buscarDados } from "./apiCache.js";
+import { buscarComCache } from "./apiCache.js";
 
-// Função para buscar nome do planeta por ID
+// Função para buscar nome do planeta por ID (COM CACHE)
 async function pegarNomePlaneta(id) {
   try {
-    const response = await fetch(`https://swapi.dev/api/planets/${id}/`);
-    if (!response.ok) {
-      throw new Error(`Erro ao buscar planeta ${id}`);
+    // Primeiro tenta buscar do cache
+    const planetasCache = await buscarComCache("planets");
+    const planetaEncontrado = planetasCache.find(p => {
+      const planetaId = p.url.split('/').filter(Boolean).pop();
+      return planetaId === id.toString();
+    });
+
+    if (planetaEncontrado) {
+      return planetaEncontrado.name;
+    } else {
+      // Se não encontrar no cache, busca da API
+      const response = await fetch(`https://swapi.dev/api/planets/${id}/`);
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar planeta ${id}`);
+      }
+      const data = await response.json();
+      return data.name;
     }
-    const data = await response.json();
-    return data.name;
   } catch (error) {
     console.error('Erro ao buscar nome do planeta:', error);
     return `Planeta ${id}`;
@@ -433,8 +445,8 @@ function filtrarPorNome(lista, textoUsuario) {
 // Inicialização quando a página carrega
 document.addEventListener("DOMContentLoaded", async function () {
   try {
-    // Carrega todos os personagens
-    const personagens = await buscarDados("people");
+    // Carrega todos os personagens COM CACHE
+    const personagens = await buscarComCache("people");
 
     // Exibe os personagens na tela
     adicionaCards(personagens);

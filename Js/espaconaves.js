@@ -1,8 +1,6 @@
 // espaconaves.js - JavaScript específico para a página de espaçonaves
+import { buscarComCache } from "./apiCache.js";
 
-import { buscarComCache, buscarDadosDasURLsComCache } from "./apiCache.js";
-
-// Função para extrair ID da URL da SWAPI (DEVE VIR ANTES DE SER USADA)
 function extrairIdDaUrl(url) {
   if (!url) return null;
   const partes = url.split("/").filter((part) => part !== "");

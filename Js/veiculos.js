@@ -1,8 +1,8 @@
 // Js/veiculos.js
-import { buscarDados } from "./apiCache.js";
+import { buscarComCache } from "./apiCache.js";
 
-// Pega do localStorage
-let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+// Pega do localStorage - Renomeie para evitar conflito com outros arquivos
+let favoritos = JSON.parse(localStorage.getItem("favoritosVeiculos")) || [];
 
 // Função para verificar se um veículo é favorito
 function isFavorito(veiculo) {
@@ -29,8 +29,8 @@ function toggleFavorito(veiculo, botaoFavorito = null) {
     }
   }
 
-  // Atualizar localStorage
-  localStorage.setItem("favoritos", JSON.stringify(favoritos));
+  // Atualizar localStorage com nome específico
+  localStorage.setItem("favoritosVeiculos", JSON.stringify(favoritos));
 
   // Atualizar todos os botões de favorito na página
   atualizarBotoesFavorito();
@@ -156,7 +156,7 @@ function removerFavoritoPorNome(nomeVeiculo) {
 
   if (index !== -1) {
     favoritos.splice(index, 1);
-    localStorage.setItem("favoritos", JSON.stringify(favoritos));
+    localStorage.setItem("favoritosVeiculos", JSON.stringify(favoritos));
 
     // Atualiza a interface
     atualizarBotoesFavorito();
@@ -218,11 +218,40 @@ function exibirModalVeiculo(veiculo) {
   basicTitle.textContent = "Informações Básicas";
   basicInfoGroup.appendChild(basicTitle);
 
+  // Função para formatar valores
+  function formatarNumero(valor) {
+    if (valor === "unknown" || valor === "n/a" || valor === "none") {
+      return "Desconhecido";
+    }
+    return valor;
+  }
+
+  function formatarCusto(custo) {
+    if (custo === "unknown" || custo === "n/a") {
+      return "Desconhecido";
+    }
+    return `${parseInt(custo).toLocaleString("pt-BR")} créditos`;
+  }
+
+  function formatarVelocidade(velocidade) {
+    if (velocidade === "unknown" || velocidade === "n/a") {
+      return "Desconhecido";
+    }
+    return `${velocidade} km/h`;
+  }
+
+  function formatarComprimento(comprimento) {
+    if (comprimento === "unknown" || comprimento === "n/a") {
+      return "Desconhecido";
+    }
+    return `${comprimento} metros`;
+  }
+
   const basicInfo = [
-    { label: "Modelo", value: veiculo.model },
-    { label: "Fabricante", value: veiculo.manufacturer },
-    { label: "Classe", value: veiculo.vehicle_class },
-    { label: "Custo", value: `${veiculo.cost_in_credits} créditos` },
+    { label: "Modelo", value: formatarNumero(veiculo.model) },
+    { label: "Fabricante", value: formatarNumero(veiculo.manufacturer) },
+    { label: "Classe", value: formatarNumero(veiculo.vehicle_class) },
+    { label: "Custo", value: formatarCusto(veiculo.cost_in_credits) },
   ];
 
   basicInfo.forEach((info) => {
@@ -252,13 +281,16 @@ function exibirModalVeiculo(veiculo) {
   specsGroup.appendChild(specsTitle);
 
   const specsInfo = [
-    { label: "Comprimento", value: `${veiculo.length} metros` },
+    { label: "Comprimento", value: formatarComprimento(veiculo.length) },
     {
       label: "Velocidade Máxima",
-      value: `${veiculo.max_atmosphering_speed} km/h`,
+      value: formatarVelocidade(veiculo.max_atmosphering_speed),
     },
-    { label: "Capacidade de Carga", value: `${veiculo.cargo_capacity} kg` },
-    { label: "Consumíveis", value: veiculo.consumables },
+    {
+      label: "Capacidade de Carga",
+      value: formatarNumero(veiculo.cargo_capacity) + " kg",
+    },
+    { label: "Consumíveis", value: formatarNumero(veiculo.consumables) },
   ];
 
   specsInfo.forEach((info) => {
@@ -287,8 +319,8 @@ function exibirModalVeiculo(veiculo) {
   crewGroup.appendChild(crewTitle);
 
   const crewInfo = [
-    { label: "Tripulação", value: veiculo.crew },
-    { label: "Passageiros", value: veiculo.passengers },
+    { label: "Tripulação", value: formatarNumero(veiculo.crew) },
+    { label: "Passageiros", value: formatarNumero(veiculo.passengers) },
   ];
 
   crewInfo.forEach((info) => {
@@ -320,10 +352,20 @@ function exibirModalVeiculo(veiculo) {
   const highlights = [
     {
       icon: "⚡",
-      text: `Velocidade máxima de ${veiculo.max_atmosphering_speed} km/h`,
+      text: `Velocidade máxima de ${formatarVelocidade(
+        veiculo.max_atmosphering_speed
+      )}`,
     },
-    { icon: "👥", text: `Transporta ${veiculo.passengers} passageiros` },
-    { icon: "📦", text: `Capacidade de carga de ${veiculo.cargo_capacity} kg` },
+    {
+      icon: "👥",
+      text: `Transporta ${formatarNumero(veiculo.passengers)} passageiros`,
+    },
+    {
+      icon: "📦",
+      text: `Capacidade de carga de ${formatarNumero(
+        veiculo.cargo_capacity
+      )} kg`,
+    },
   ];
 
   highlights.forEach((highlight) => {
@@ -427,11 +469,40 @@ function adicionaCards(listaVeiculos) {
     const features = document.createElement("div");
     features.classList.add("veiculo-card-features");
 
+    // Funções de formatação para os cards
+    function formatarNumeroCard(valor) {
+      if (valor === "unknown" || valor === "n/a" || valor === "none") {
+        return "Desconhecido";
+      }
+      return valor;
+    }
+
+    function formatarCustoCard(custo) {
+      if (custo === "unknown" || custo === "n/a") {
+        return "Desconhecido";
+      }
+      try {
+        return `${parseInt(custo).toLocaleString("pt-BR")} créditos`;
+      } catch {
+        return custo + " créditos";
+      }
+    }
+
+    function formatarVelocidadeCard(velocidade) {
+      if (velocidade === "unknown" || velocidade === "n/a") {
+        return "Desconhecido";
+      }
+      return `${velocidade} km/h`;
+    }
+
     const featureList = [
-      { label: "Fabricante", value: veiculo.manufacturer },
-      { label: "Custo", value: `${veiculo.cost_in_credits} créditos` },
-      { label: "Velocidade", value: `${veiculo.max_atmosphering_speed} km/h` },
-      { label: "Tripulação", value: veiculo.crew },
+      { label: "Fabricante", value: formatarNumeroCard(veiculo.manufacturer) },
+      { label: "Custo", value: formatarCustoCard(veiculo.cost_in_credits) },
+      {
+        label: "Velocidade",
+        value: formatarVelocidadeCard(veiculo.max_atmosphering_speed),
+      },
+      { label: "Tripulação", value: formatarNumeroCard(veiculo.crew) },
     ];
 
     featureList.forEach((feature) => {
@@ -474,11 +545,28 @@ function adicionaCards(listaVeiculos) {
   });
 }
 
+// Função para filtrar veículos por nome
+function filtrarPorNome(lista, textoUsuario) {
+  const textoEmMinusculo = textoUsuario.toLowerCase();
+
+  const listaFiltrada = lista.filter((veiculo) => {
+    return (
+      veiculo.name.toLowerCase().includes(textoEmMinusculo) ||
+      (veiculo.model &&
+        veiculo.model.toLowerCase().includes(textoEmMinusculo)) ||
+      (veiculo.manufacturer &&
+        veiculo.manufacturer.toLowerCase().includes(textoEmMinusculo))
+    );
+  });
+
+  return listaFiltrada;
+}
+
 // Inicialização quando a página carrega
 document.addEventListener("DOMContentLoaded", async function () {
   try {
-    // Carrega todos os veículos
-    const veiculos = await buscarDados("vehicles");
+    // Carrega todos os veículos COM CACHE
+    const veiculos = await buscarComCache("vehicles");
 
     // Exibe os veículos na tela
     adicionaCards(veiculos);
@@ -509,12 +597,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   } catch (error) {
     console.error("Erro ao inicializar a página:", error);
+    // Mostra mensagem de erro para o usuário
+    const container = document.getElementById("listaVeiculos");
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">⚠️</div>
+        <h3>Erro ao carregar veículos</h3>
+        <p>Verifique sua conexão com a internet e tente novamente.</p>
+        <button onclick="location.reload()" class="btn btn-primary mt-3">Tentar Novamente</button>
+      </div>
+    `;
   }
 });
-
-// Função para filtrar veículos por nome (se não existir)
-function filtrarPorNome(veiculos, termo) {
-  return veiculos.filter((veiculo) =>
-    veiculo.name.toLowerCase().includes(termo.toLowerCase())
-  );
-}
