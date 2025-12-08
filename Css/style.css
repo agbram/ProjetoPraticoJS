@@ -16,8 +16,16 @@
   --border-radius: 12px;
   --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   --shadow-hover: 0 12px 25px rgba(0, 0, 0, 0.4);
-  --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-  --gradient-dark: linear-gradient(135deg, var(--background-dark), var(--background-darker));
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--primary-dark)
+  );
+  --gradient-dark: linear-gradient(
+    135deg,
+    var(--background-dark),
+    var(--background-darker)
+  );
 }
 
 /* Reset e estilos base */
@@ -33,21 +41,20 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
   overflow-x: hidden;
 }
 
 /* Efeito de estrelas no background */
 body::before {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+  background-image: radial-gradient(2px 2px at 20px 30px, #eee, transparent),
     radial-gradient(2px 2px at 40px 70px, rgba(255, 193, 7, 0.3), transparent),
     radial-gradient(1px 1px at 90px 40px, #fff, transparent),
     radial-gradient(1px 1px at 130px 80px, rgba(255, 193, 7, 0.3), transparent),
@@ -59,8 +66,12 @@ body::before {
 }
 
 @keyframes twinkle {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-100px); }
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100px);
+  }
 }
 
 /* Navegação - Estilo similar à página de veículos */
@@ -150,14 +161,18 @@ main {
 }
 
 .hero-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(255, 193, 7, 0.1) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 193, 7, 0.1) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   z-index: -1;
 }
@@ -166,7 +181,11 @@ main {
   font-size: 3.5rem;
   font-weight: 800;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-light),
+    var(--primary-color)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -224,13 +243,18 @@ main {
 }
 
 .nav-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
   transition: left 0.5s;
 }
 
@@ -263,7 +287,7 @@ main {
   color: var(--primary-color);
 }
 
-.nav-card:hover .nav-title{
+.nav-card:hover .nav-title {
   color: var(--text-light);
 }
 
@@ -328,18 +352,20 @@ main {
 
 /* Efeito de brilho nos cards */
 .nav-card::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -2px;
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, 
-    var(--primary-color), 
-    transparent, 
-    var(--primary-color), 
-    transparent, 
-    var(--primary-color));
+  background: linear-gradient(
+    45deg,
+    var(--primary-color),
+    transparent,
+    var(--primary-color),
+    transparent,
+    var(--primary-color)
+  );
   border-radius: var(--border-radius);
   z-index: -1;
   opacity: 0;
@@ -374,19 +400,22 @@ footer {
 }
 
 footer::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--primary-color),
+    transparent
+  );
 }
 
 footer p {
-  color: var(--text-muted);
   margin: 0;
-  font-size: 0.9rem;
 }
 
 /* Responsividade - Grid CSS */
@@ -394,7 +423,7 @@ footer p {
   .hero-title {
     font-size: 3rem;
   }
-  
+
   .cards-grid {
     grid-template-columns: repeat(3, 1fr); /* Mantém 3 colunas */
   }
@@ -404,15 +433,15 @@ footer p {
   .hero-title {
     font-size: 2.5rem;
   }
-  
+
   .hero-subtitle {
     font-size: 1.1rem;
   }
-  
+
   .nav-card {
     padding: 2rem 1rem;
   }
-  
+
   .cards-grid {
     grid-template-columns: repeat(2, 1fr); /* 2 colunas em tablets */
   }
@@ -422,32 +451,32 @@ footer p {
   .hero-title {
     font-size: 2.2rem;
   }
-  
+
   .hero-section {
     padding: 2rem 0;
   }
-  
+
   .nav-icon {
     font-size: 2.5rem;
   }
-  
+
   .nav-title {
     font-size: 1.3rem;
   }
-  
+
   .navbar-nav .nav-link {
     padding: 0.5rem 1rem;
     margin: 0.2rem 0;
     text-align: center;
   }
-  
+
   .navbar-nav .nav-link.active::after {
     bottom: 5px;
     left: 50%;
     transform: translateX(-50%);
     width: 50%;
   }
-  
+
   main {
     padding: 2rem 0;
   }
@@ -457,28 +486,28 @@ footer p {
   .hero-title {
     font-size: 1.8rem;
   }
-  
+
   .hero-subtitle {
     font-size: 1rem;
     padding: 0 1rem;
   }
-  
+
   .nav-card {
     padding: 1.5rem 1rem;
   }
-  
+
   .nav-icon {
     font-size: 2rem;
   }
-  
+
   .nav-title {
     font-size: 1.2rem;
   }
-  
+
   .nav-description {
     font-size: 0.85rem;
   }
-  
+
   .cards-grid {
     grid-template-columns: 1fr; /* 1 coluna em mobile */
     gap: 1rem;
@@ -550,5 +579,7 @@ html {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
